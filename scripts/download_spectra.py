@@ -1,6 +1,6 @@
 
 """
-Download HARPS data from the ESO archive.
+Find HARPS data from the ESO archive and produce a script to download the data.
 """
 
 __author__ = "Andrew R. Casey <arc@ast.cam.ac.uk>"
@@ -32,30 +32,40 @@ eso = ESO()
 eso.login("andycasey")
 
 cwd = os.path.dirname(os.path.realpath(__file__))
+data_dir = "{}/../data/harps-spectra/".format(cwd)
 eso.cache_location = "{}/cache/".format(cwd)
 # See https://github.com/astropy/astroquery/issues/800
 eso._survey_list = ["HARPS"]
 eso.ROW_LIMIT = 10000
 
-eso_catalog = []
+no_data = []
+no_records = []
 local_catalog = Table.read("data/HARPS_all.csv")
-targets = set(local_catalog["Name"])
+targets = list(set(local_catalog["Name"]))[1:]
+
 N = len(targets)
 M = 0
 
 for i, target in enumerate(targets):
 
+    eso_catalog_path = os.path.join(data_dir, "eso-{}.fits".format(target))
+    
+    if os.path.exists(eso_catalog_path):
+        print("Skipping {}".format(target))
+        continue
+
     # Search the ESO archive for HARPS data.
     r = eso.query_survey("HARPS", target=target)
     if r is None:
         print("No results found for star name {}".format(target))
+        no_records.append(target)
         continue
 
     # For some reason we get a lot of shit that we don't want.
     # Require:
     keep = (r["Instrument"] == "HARPS") \
          * (r["R (&lambda;/&delta;&lambda;)"] == 115000)
-    r = r[keep]
+    eso_catalog = r[keep]
 
     # Search again but return in HTML so that we can get the PHASE3 identifiers.
     survey_form = eso._request(
@@ -73,75 +83,20 @@ for i, target in enumerate(targets):
     # intermediate pipeline products, not just the final spectrum.
     
     datasets = []
-    for arcfile in r["ARCFILE"]:
-
+    for arcfile in eso_catalog["ARCFILE"]:
         match = re.findall(
             "PHASE3\+[0-9]+\+{}".format(arcfile.replace(".", "\.")), r_html)
         assert len(match) == 1
-
         datasets.extend(match)
 
-    r["dataset"] = datasets
-
-    # Stringify the Filter columns because these can differ in format.
-    stringify_columns = ("Filter", "REFERENC")
-    for column_name in stringify_columns:
-        _ = map(str, r[column_name])
-        del r[column_name]
-        r[column_name] = _
-
-    _ = len(r)
-    M += _
+    eso_catalog["dataset"] = datasets
+    
+    K = len(eso_catalog)
+    M += K
 
     print("Found {} datasets ({} total so far) for {} ({}/{})".format(
-        _, M, target, i, N))
+        K, M, target, i, N))
     
-    eso_catalog.append(r)
-
-
-# Stack the records from ESO.
-eso_catalog = vstack(eso_catalog)
-N = len(eso_catalog)
-print("{} datasets found (~{} MB)".format(N, N * 11))
-
-eso_catalog_path = os.path.join(cwd, "eso-datasets.fits")
-eso_catalog.write(eso_catalog_path, overwrite=True)
-print("Saved dataset records to {}".format(eso_catalog_path))
-
-
-# Request the data!
-data = [("dataset", dataset) for dataset in eso_catalog["dataset"]]
-
-prepare_response = eso._session.request("POST",
-    "http://dataportal.eso.org/rh/confirmation", data=data)
-
-# Additional payload items required for confirmation.
-data += [
-    ("requestDescription", ""),
-    ("deliveryMediaType", "WEB"), # OR USB_DISK --> Holy shit what the fuck!
-    ("requestCommand", "SELECTIVE_HOTFLY"),
-    ("submit", "Submit")
-]
-
-confirmation_response = eso._session.request("POST", 
-    "http://dataportal.eso.org/rh/requests/{}/submission".format(eso.USERNAME),
-    data=data)
-
-# Get the request number and get the download script from ESO.
-_ = re.findall("Request #[0-9]+\w", confirmation_response.text)[0].split()[-1]
-request_number = int(_.lstrip("#"))
-
-remote_path = "https://dataportal.eso.org/rh/requests/{username}/{request}/script"\
-    .format(username=eso.USERNAME, request=request_number)
-local_path = os.path.join(cwd, "download_spectra.sh")
-
-print("Giving ESO 10 seconds to prepare the download script at {}..."\
-    .format(remote_path))
-
-time.sleep(10)
-completed_response = eso._download_file(remote_path, local_path)
-print("Download script from {} saved to {}".format(remote_path, local_path))
-
-# Remove things from the cache.
-for path in glob(eso.cache_location + "/*"):
-    os.remove(path)
+    # Save the catalog.
+    eso_catalog.write(eso_catalog_path, overwrite=True)
+    print("Saved dataset records to {}".format(eso_catalog_path))
