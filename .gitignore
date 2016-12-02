@@ -5,3 +5,6 @@ paper/ms.log
 paper/ms.aux
 
 data/
+
+scripts/download_spectra.sh
+scripts/cache/
