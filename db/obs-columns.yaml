@@ -1,0 +1,888 @@
+BITPIX: bitpix
+CDELT1: cdelt1
+CRVAL1: crval1
+CTYPE1: ctype1
+DATASUM: datasum
+DATE: date
+DATE-OBS: date_obs
+DEC: dec
+EQUINOX: equinox
+ESO ADA ABSROT END: ada_absrot_end
+ESO ADA ABSROT START: ada_absrot_start
+ESO ADA GUID DEC: ada_guid_dec
+ESO ADA GUID RA: ada_guid_ra
+ESO ADA GUID STATUS: ada_guid_status
+ESO ADA POSANG: ada_posang
+ESO DET BITS: det_bits
+ESO DET CHIPS: det_chips
+ESO DET DATE: det_date
+ESO DET DEC: det_dec
+ESO DET DID: det_did
+ESO DET EXP NO: det_exp_no
+ESO DET EXP RDTTIME: det_exp_rdttime
+ESO DET EXP TYPE: det_exp_type
+ESO DET EXP XFERTIM: det_exp_xfertim
+ESO DET FRAM ID: det_fram_id
+ESO DET FRAM TYPE: det_fram_type
+ESO DET ID: det_id
+ESO DET NAME: det_name
+ESO DET OUTPUTS: det_outputs
+ESO DET OUTREF: det_outref
+ESO DET RA: det_ra
+ESO DET READ CLOCK: det_read_clock
+ESO DET READ MODE: det_read_mode
+ESO DET READ NFRAM: det_read_nfram
+ESO DET READ SPEED: det_read_speed
+ESO DET SHUT ID: det_shut_id
+ESO DET SHUT TMCLOS: det_shut_tmclos
+ESO DET SHUT TMOPEN: det_shut_tmopen
+ESO DET SHUT TYPE: det_shut_type
+ESO DET SOFW MODE: det_sofw_mode
+ESO DET TELE INT: det_tele_int
+ESO DET TELE NO: det_tele_no
+ESO DET TLM1 END: det_tlm1_end
+ESO DET TLM1 ID: det_tlm1_id
+ESO DET TLM1 NAME: det_tlm1_name
+ESO DET TLM1 START: det_tlm1_start
+ESO DET TLM2 END: det_tlm2_end
+ESO DET TLM2 ID: det_tlm2_id
+ESO DET TLM2 NAME: det_tlm2_name
+ESO DET TLM2 START: det_tlm2_start
+ESO DET TLM3 END: det_tlm3_end
+ESO DET TLM3 ID: det_tlm3_id
+ESO DET TLM3 NAME: det_tlm3_name
+ESO DET TLM3 START: det_tlm3_start
+ESO DET WIN1 BINX: det_win1_binx
+ESO DET WIN1 BINY: det_win1_biny
+ESO DET WIN1 DIT1: det_win1_dit1
+ESO DET WIN1 DKTM: det_win1_dktm
+ESO DET WIN1 NDIT: det_win1_ndit
+ESO DET WIN1 NX: det_win1_nx
+ESO DET WIN1 NY: det_win1_ny
+ESO DET WIN1 ST: det_win1_st
+ESO DET WIN1 STRX: det_win1_strx
+ESO DET WIN1 STRY: det_win1_stry
+ESO DET WIN1 UIT1: det_win1_uit1
+ESO DET WINDOWS: det_windows
+ESO DPR CATG: dpr_catg
+ESO DPR TECH: dpr_tech
+ESO DPR TYPE: dpr_type
+ESO DRS BERV: drs_berv
+ESO DRS BERVMX: drs_bervmx
+ESO DRS BIS RV: drs_bis_rv
+ESO DRS BIS SPAN: drs_bis_span
+ESO DRS BJD: drs_bjd
+ESO DRS BLAZE FILE: drs_blaze_file
+ESO DRS CCD CONAD: drs_ccd_conad
+ESO DRS CCD SIGDET: drs_ccd_sigdet
+ESO DRS CCF CONTRAST: drs_ccf_contrast
+ESO DRS CCF FWHM: drs_ccf_fwhm
+ESO DRS CCF LINES: drs_ccf_lines
+ESO DRS CCF MASK: drs_ccf_mask
+ESO DRS CCF MAXCPP: drs_ccf_maxcpp
+ESO DRS CCF NOISE: drs_ccf_noise
+ESO DRS CCF RV: drs_ccf_rv
+ESO DRS CCF RVC: drs_ccf_rvc
+ESO DRS DRIFT ALGO: drs_drift_algo
+ESO DRS DRIFT CCF RV: drs_drift_ccf_rv
+ESO DRS DRIFT NBCOS: drs_drift_nbcos
+ESO DRS DRIFT NBORDKILL: drs_drift_nbordkill
+ESO DRS DRIFT NOISE: drs_drift_noise
+ESO DRS DRIFT QC: drs_drift_qc
+ESO DRS DRIFT REF CCF: drs_drift_ref_ccf
+ESO DRS DRIFT REF RV: drs_drift_ref_rv
+ESO DRS DRIFT REF SPE: drs_drift_ref_spe
+ESO DRS DRIFT RFLUX: drs_drift_rflux
+ESO DRS DRIFT RV USED: drs_drift_rv_used
+ESO DRS DRIFT SPE RV: drs_drift_spe_rv
+ESO DRS DVRMS: drs_dvrms
+ESO DRS FLUX CORR COEFF0: drs_flux_corr_coeff0
+ESO DRS FLUX CORR COEFF1: drs_flux_corr_coeff1
+ESO DRS FLUX CORR COEFF2: drs_flux_corr_coeff2
+ESO DRS FLUX CORR COEFF3: drs_flux_corr_coeff3
+ESO DRS FLUX CORR COEFF4: drs_flux_corr_coeff4
+ESO DRS FLUX CORR COEFF5: drs_flux_corr_coeff5
+ESO DRS FLUX CORR MAX: drs_flux_corr_max
+ESO DRS FLUX CORR MIN: drs_flux_corr_min
+ESO DRS SPE EXT COSM: drs_spe_ext_cosm
+ESO DRS SPE EXT OPT: drs_spe_ext_opt
+ESO DRS SPE EXT SN0: drs_spe_ext_sn0
+ESO DRS SPE EXT SN1: drs_spe_ext_sn1
+ESO DRS SPE EXT SN10: drs_spe_ext_sn10
+ESO DRS SPE EXT SN11: drs_spe_ext_sn11
+ESO DRS SPE EXT SN12: drs_spe_ext_sn12
+ESO DRS SPE EXT SN13: drs_spe_ext_sn13
+ESO DRS SPE EXT SN14: drs_spe_ext_sn14
+ESO DRS SPE EXT SN15: drs_spe_ext_sn15
+ESO DRS SPE EXT SN16: drs_spe_ext_sn16
+ESO DRS SPE EXT SN17: drs_spe_ext_sn17
+ESO DRS SPE EXT SN18: drs_spe_ext_sn18
+ESO DRS SPE EXT SN19: drs_spe_ext_sn19
+ESO DRS SPE EXT SN2: drs_spe_ext_sn2
+ESO DRS SPE EXT SN20: drs_spe_ext_sn20
+ESO DRS SPE EXT SN21: drs_spe_ext_sn21
+ESO DRS SPE EXT SN22: drs_spe_ext_sn22
+ESO DRS SPE EXT SN23: drs_spe_ext_sn23
+ESO DRS SPE EXT SN24: drs_spe_ext_sn24
+ESO DRS SPE EXT SN25: drs_spe_ext_sn25
+ESO DRS SPE EXT SN26: drs_spe_ext_sn26
+ESO DRS SPE EXT SN27: drs_spe_ext_sn27
+ESO DRS SPE EXT SN28: drs_spe_ext_sn28
+ESO DRS SPE EXT SN29: drs_spe_ext_sn29
+ESO DRS SPE EXT SN3: drs_spe_ext_sn3
+ESO DRS SPE EXT SN30: drs_spe_ext_sn30
+ESO DRS SPE EXT SN31: drs_spe_ext_sn31
+ESO DRS SPE EXT SN32: drs_spe_ext_sn32
+ESO DRS SPE EXT SN33: drs_spe_ext_sn33
+ESO DRS SPE EXT SN34: drs_spe_ext_sn34
+ESO DRS SPE EXT SN35: drs_spe_ext_sn35
+ESO DRS SPE EXT SN36: drs_spe_ext_sn36
+ESO DRS SPE EXT SN37: drs_spe_ext_sn37
+ESO DRS SPE EXT SN38: drs_spe_ext_sn38
+ESO DRS SPE EXT SN39: drs_spe_ext_sn39
+ESO DRS SPE EXT SN4: drs_spe_ext_sn4
+ESO DRS SPE EXT SN40: drs_spe_ext_sn40
+ESO DRS SPE EXT SN41: drs_spe_ext_sn41
+ESO DRS SPE EXT SN42: drs_spe_ext_sn42
+ESO DRS SPE EXT SN43: drs_spe_ext_sn43
+ESO DRS SPE EXT SN44: drs_spe_ext_sn44
+ESO DRS SPE EXT SN45: drs_spe_ext_sn45
+ESO DRS SPE EXT SN46: drs_spe_ext_sn46
+ESO DRS SPE EXT SN47: drs_spe_ext_sn47
+ESO DRS SPE EXT SN48: drs_spe_ext_sn48
+ESO DRS SPE EXT SN49: drs_spe_ext_sn49
+ESO DRS SPE EXT SN5: drs_spe_ext_sn5
+ESO DRS SPE EXT SN50: drs_spe_ext_sn50
+ESO DRS SPE EXT SN51: drs_spe_ext_sn51
+ESO DRS SPE EXT SN52: drs_spe_ext_sn52
+ESO DRS SPE EXT SN53: drs_spe_ext_sn53
+ESO DRS SPE EXT SN54: drs_spe_ext_sn54
+ESO DRS SPE EXT SN55: drs_spe_ext_sn55
+ESO DRS SPE EXT SN56: drs_spe_ext_sn56
+ESO DRS SPE EXT SN57: drs_spe_ext_sn57
+ESO DRS SPE EXT SN58: drs_spe_ext_sn58
+ESO DRS SPE EXT SN59: drs_spe_ext_sn59
+ESO DRS SPE EXT SN6: drs_spe_ext_sn6
+ESO DRS SPE EXT SN60: drs_spe_ext_sn60
+ESO DRS SPE EXT SN61: drs_spe_ext_sn61
+ESO DRS SPE EXT SN62: drs_spe_ext_sn62
+ESO DRS SPE EXT SN63: drs_spe_ext_sn63
+ESO DRS SPE EXT SN64: drs_spe_ext_sn64
+ESO DRS SPE EXT SN65: drs_spe_ext_sn65
+ESO DRS SPE EXT SN66: drs_spe_ext_sn66
+ESO DRS SPE EXT SN67: drs_spe_ext_sn67
+ESO DRS SPE EXT SN68: drs_spe_ext_sn68
+ESO DRS SPE EXT SN69: drs_spe_ext_sn69
+ESO DRS SPE EXT SN7: drs_spe_ext_sn7
+ESO DRS SPE EXT SN70: drs_spe_ext_sn70
+ESO DRS SPE EXT SN71: drs_spe_ext_sn71
+ESO DRS SPE EXT SN8: drs_spe_ext_sn8
+ESO DRS SPE EXT SN9: drs_spe_ext_sn9
+ESO DRS SPE EXT WINDOW: drs_spe_ext_window
+ESO DRS SPE NBCOS0: drs_spe_nbcos0
+ESO DRS SPE NBCOS1: drs_spe_nbcos1
+ESO DRS SPE NBCOS10: drs_spe_nbcos10
+ESO DRS SPE NBCOS11: drs_spe_nbcos11
+ESO DRS SPE NBCOS12: drs_spe_nbcos12
+ESO DRS SPE NBCOS13: drs_spe_nbcos13
+ESO DRS SPE NBCOS14: drs_spe_nbcos14
+ESO DRS SPE NBCOS15: drs_spe_nbcos15
+ESO DRS SPE NBCOS16: drs_spe_nbcos16
+ESO DRS SPE NBCOS17: drs_spe_nbcos17
+ESO DRS SPE NBCOS18: drs_spe_nbcos18
+ESO DRS SPE NBCOS19: drs_spe_nbcos19
+ESO DRS SPE NBCOS2: drs_spe_nbcos2
+ESO DRS SPE NBCOS20: drs_spe_nbcos20
+ESO DRS SPE NBCOS21: drs_spe_nbcos21
+ESO DRS SPE NBCOS22: drs_spe_nbcos22
+ESO DRS SPE NBCOS23: drs_spe_nbcos23
+ESO DRS SPE NBCOS24: drs_spe_nbcos24
+ESO DRS SPE NBCOS25: drs_spe_nbcos25
+ESO DRS SPE NBCOS26: drs_spe_nbcos26
+ESO DRS SPE NBCOS27: drs_spe_nbcos27
+ESO DRS SPE NBCOS28: drs_spe_nbcos28
+ESO DRS SPE NBCOS29: drs_spe_nbcos29
+ESO DRS SPE NBCOS3: drs_spe_nbcos3
+ESO DRS SPE NBCOS30: drs_spe_nbcos30
+ESO DRS SPE NBCOS31: drs_spe_nbcos31
+ESO DRS SPE NBCOS32: drs_spe_nbcos32
+ESO DRS SPE NBCOS33: drs_spe_nbcos33
+ESO DRS SPE NBCOS34: drs_spe_nbcos34
+ESO DRS SPE NBCOS35: drs_spe_nbcos35
+ESO DRS SPE NBCOS36: drs_spe_nbcos36
+ESO DRS SPE NBCOS37: drs_spe_nbcos37
+ESO DRS SPE NBCOS38: drs_spe_nbcos38
+ESO DRS SPE NBCOS39: drs_spe_nbcos39
+ESO DRS SPE NBCOS4: drs_spe_nbcos4
+ESO DRS SPE NBCOS40: drs_spe_nbcos40
+ESO DRS SPE NBCOS41: drs_spe_nbcos41
+ESO DRS SPE NBCOS42: drs_spe_nbcos42
+ESO DRS SPE NBCOS43: drs_spe_nbcos43
+ESO DRS SPE NBCOS44: drs_spe_nbcos44
+ESO DRS SPE NBCOS45: drs_spe_nbcos45
+ESO DRS SPE NBCOS46: drs_spe_nbcos46
+ESO DRS SPE NBCOS47: drs_spe_nbcos47
+ESO DRS SPE NBCOS48: drs_spe_nbcos48
+ESO DRS SPE NBCOS49: drs_spe_nbcos49
+ESO DRS SPE NBCOS5: drs_spe_nbcos5
+ESO DRS SPE NBCOS50: drs_spe_nbcos50
+ESO DRS SPE NBCOS51: drs_spe_nbcos51
+ESO DRS SPE NBCOS52: drs_spe_nbcos52
+ESO DRS SPE NBCOS53: drs_spe_nbcos53
+ESO DRS SPE NBCOS54: drs_spe_nbcos54
+ESO DRS SPE NBCOS55: drs_spe_nbcos55
+ESO DRS SPE NBCOS56: drs_spe_nbcos56
+ESO DRS SPE NBCOS57: drs_spe_nbcos57
+ESO DRS SPE NBCOS58: drs_spe_nbcos58
+ESO DRS SPE NBCOS59: drs_spe_nbcos59
+ESO DRS SPE NBCOS6: drs_spe_nbcos6
+ESO DRS SPE NBCOS60: drs_spe_nbcos60
+ESO DRS SPE NBCOS61: drs_spe_nbcos61
+ESO DRS SPE NBCOS62: drs_spe_nbcos62
+ESO DRS SPE NBCOS63: drs_spe_nbcos63
+ESO DRS SPE NBCOS64: drs_spe_nbcos64
+ESO DRS SPE NBCOS65: drs_spe_nbcos65
+ESO DRS SPE NBCOS66: drs_spe_nbcos66
+ESO DRS SPE NBCOS67: drs_spe_nbcos67
+ESO DRS SPE NBCOS68: drs_spe_nbcos68
+ESO DRS SPE NBCOS69: drs_spe_nbcos69
+ESO DRS SPE NBCOS7: drs_spe_nbcos7
+ESO DRS SPE NBCOS70: drs_spe_nbcos70
+ESO DRS SPE NBCOS71: drs_spe_nbcos71
+ESO DRS SPE NBCOS8: drs_spe_nbcos8
+ESO DRS SPE NBCOS9: drs_spe_nbcos9
+ESO DRS VERSION: drs_version
+ESO INS ADC1 DEC: ins_adc1_dec
+ESO INS ADC1 END: ins_adc1_end
+ESO INS ADC1 MODE: ins_adc1_mode
+ESO INS ADC1 RA: ins_adc1_ra
+ESO INS ADC2 DEC: ins_adc2_dec
+ESO INS ADC2 END: ins_adc2_end
+ESO INS ADC2 MODE: ins_adc2_mode
+ESO INS ADC2 RA: ins_adc2_ra
+ESO INS ADCS NAME: ins_adcs_name
+ESO INS ADCS NO: ins_adcs_no
+ESO INS DATE: ins_date
+ESO INS DET1 CTMAX: ins_det1_ctmax
+ESO INS DET1 CTMEAN: ins_det1_ctmean
+ESO INS DET1 CTMIN: ins_det1_ctmin
+ESO INS DET1 CTRMS: ins_det1_ctrms
+ESO INS DET1 CTTOT: ins_det1_cttot
+ESO INS DET1 ID: ins_det1_id
+ESO INS DET1 NAME: ins_det1_name
+ESO INS DET1 OFFDRK: ins_det1_offdrk
+ESO INS DET1 OFFSKY: ins_det1_offsky
+ESO INS DET1 TMMEAN: ins_det1_tmmean
+ESO INS DET1 UIT: ins_det1_uit
+ESO INS DET2 CTMAX: ins_det2_ctmax
+ESO INS DET2 CTMEAN: ins_det2_ctmean
+ESO INS DET2 CTMIN: ins_det2_ctmin
+ESO INS DET2 CTRMS: ins_det2_ctrms
+ESO INS DET2 CTTOT: ins_det2_cttot
+ESO INS DET2 ID: ins_det2_id
+ESO INS DET2 NAME: ins_det2_name
+ESO INS DET2 OFFDRK: ins_det2_offdrk
+ESO INS DET2 OFFSKY: ins_det2_offsky
+ESO INS DET2 TMMEAN: ins_det2_tmmean
+ESO INS DET2 UIT: ins_det2_uit
+ESO INS DID: ins_did
+ESO INS HEFS ST: ins_hefs_st
+ESO INS ID: ins_id
+ESO INS LAMP6 ID: ins_lamp6_id
+ESO INS LAMP6 NAME: ins_lamp6_name
+ESO INS LAMP6 ST: ins_lamp6_st
+ESO INS LAMP7 ST: ins_lamp7_st
+ESO INS MIRR1 ID: ins_mirr1_id
+ESO INS MIRR1 NAME: ins_mirr1_name
+ESO INS MIRR1 NO: ins_mirr1_no
+ESO INS MODE: ins_mode
+ESO INS OPTI2 ID: ins_opti2_id
+ESO INS OPTI2 NAME: ins_opti2_name
+ESO INS OPTI2 NO: ins_opti2_no
+ESO INS OPTI2 TYPE: ins_opti2_type
+ESO INS OPTI3 ID: ins_opti3_id
+ESO INS OPTI3 NAME: ins_opti3_name
+ESO INS OPTI3 NO: ins_opti3_no
+ESO INS OPTI3 TYPE: ins_opti3_type
+ESO INS OPTI4 ID: ins_opti4_id
+ESO INS OPTI4 NAME: ins_opti4_name
+ESO INS OPTI4 NO: ins_opti4_no
+ESO INS OPTI4 SWSIM: ins_opti4_swsim
+ESO INS OPTI4 TYPE: ins_opti4_type
+ESO INS OPTI5 ID: ins_opti5_id
+ESO INS OPTI5 NAME: ins_opti5_name
+ESO INS OPTI5 NO: ins_opti5_no
+ESO INS OPTI5 TYPE: ins_opti5_type
+ESO INS OPTI6 ID: ins_opti6_id
+ESO INS OPTI6 NAME: ins_opti6_name
+ESO INS OPTI6 NO: ins_opti6_no
+ESO INS OPTI6 TYPE: ins_opti6_type
+ESO INS OPTI7 ID: ins_opti7_id
+ESO INS OPTI7 NAME: ins_opti7_name
+ESO INS OPTI7 NO: ins_opti7_no
+ESO INS OPTI7 TYPE: ins_opti7_type
+ESO INS PATH: ins_path
+ESO INS ROT1 ENC: ins_rot1_enc
+ESO INS ROT1 POS: ins_rot1_pos
+ESO INS SENS1 DETCOEF: ins_sens1_detcoef
+ESO INS SENS1 GRAD: ins_sens1_grad
+ESO INS SENS1 ID: ins_sens1_id
+ESO INS SENS1 LRCONST: ins_sens1_lrconst
+ESO INS SENS1 LRRMS: ins_sens1_lrrms
+ESO INS SENS1 MAX: ins_sens1_max
+ESO INS SENS1 MEAN: ins_sens1_mean
+ESO INS SENS1 MIN: ins_sens1_min
+ESO INS SENS1 NAME: ins_sens1_name
+ESO INS SENS1 RMS: ins_sens1_rms
+ESO INS SENS1 VAL: ins_sens1_val
+ESO INS SENS2 DETCOEF: ins_sens2_detcoef
+ESO INS SENS2 GRAD: ins_sens2_grad
+ESO INS SENS2 ID: ins_sens2_id
+ESO INS SENS2 LRCONST: ins_sens2_lrconst
+ESO INS SENS2 LRRMS: ins_sens2_lrrms
+ESO INS SENS2 MAX: ins_sens2_max
+ESO INS SENS2 MEAN: ins_sens2_mean
+ESO INS SENS2 MIN: ins_sens2_min
+ESO INS SENS2 NAME: ins_sens2_name
+ESO INS SENS2 RMS: ins_sens2_rms
+ESO INS SENS2 VAL: ins_sens2_val
+ESO INS SENS6 DETCOEF: ins_sens6_detcoef
+ESO INS SENS6 GRAD: ins_sens6_grad
+ESO INS SENS6 ID: ins_sens6_id
+ESO INS SENS6 LRCONST: ins_sens6_lrconst
+ESO INS SENS6 LRRMS: ins_sens6_lrrms
+ESO INS SENS6 MAX: ins_sens6_max
+ESO INS SENS6 MEAN: ins_sens6_mean
+ESO INS SENS6 MIN: ins_sens6_min
+ESO INS SENS6 NAME: ins_sens6_name
+ESO INS SENS6 RMS: ins_sens6_rms
+ESO INS SENS6 VAL: ins_sens6_val
+ESO INS SENSOR2 SWSIM: ins_sensor2_swsim
+ESO INS SENSOR4 SWSIM: ins_sensor4_swsim
+ESO INS SENSOR5 SWSIM: ins_sensor5_swsim
+ESO INS SENSOR6 SWSIM: ins_sensor6_swsim
+ESO INS SENSOR7 SWSIM: ins_sensor7_swsim
+ESO INS SENSOR8 SWSIM: ins_sensor8_swsim
+ESO INS SENSOR9 SWSIM: ins_sensor9_swsim
+ESO INS SHUT1 ID: ins_shut1_id
+ESO INS SHUT1 NAME: ins_shut1_name
+ESO INS SHUT1 ST: ins_shut1_st
+ESO INS SWSIM: ins_swsim
+ESO INS TEMP1 DETCOEF: ins_temp1_detcoef
+ESO INS TEMP1 GRAD: ins_temp1_grad
+ESO INS TEMP1 ID: ins_temp1_id
+ESO INS TEMP1 LRCONST: ins_temp1_lrconst
+ESO INS TEMP1 LRRMS: ins_temp1_lrrms
+ESO INS TEMP1 MAX: ins_temp1_max
+ESO INS TEMP1 MEAN: ins_temp1_mean
+ESO INS TEMP1 MIN: ins_temp1_min
+ESO INS TEMP1 NAME: ins_temp1_name
+ESO INS TEMP1 RMS: ins_temp1_rms
+ESO INS TEMP1 VAL: ins_temp1_val
+ESO INS TEMP10 DETCOEF: ins_temp10_detcoef
+ESO INS TEMP10 GRAD: ins_temp10_grad
+ESO INS TEMP10 ID: ins_temp10_id
+ESO INS TEMP10 LRCONST: ins_temp10_lrconst
+ESO INS TEMP10 LRRMS: ins_temp10_lrrms
+ESO INS TEMP10 MAX: ins_temp10_max
+ESO INS TEMP10 MEAN: ins_temp10_mean
+ESO INS TEMP10 MIN: ins_temp10_min
+ESO INS TEMP10 NAME: ins_temp10_name
+ESO INS TEMP10 RMS: ins_temp10_rms
+ESO INS TEMP10 VAL: ins_temp10_val
+ESO INS TEMP11 DETCOEF: ins_temp11_detcoef
+ESO INS TEMP11 GRAD: ins_temp11_grad
+ESO INS TEMP11 ID: ins_temp11_id
+ESO INS TEMP11 LRCONST: ins_temp11_lrconst
+ESO INS TEMP11 LRRMS: ins_temp11_lrrms
+ESO INS TEMP11 MAX: ins_temp11_max
+ESO INS TEMP11 MEAN: ins_temp11_mean
+ESO INS TEMP11 MIN: ins_temp11_min
+ESO INS TEMP11 NAME: ins_temp11_name
+ESO INS TEMP11 RMS: ins_temp11_rms
+ESO INS TEMP11 VAL: ins_temp11_val
+ESO INS TEMP12 DETCOEF: ins_temp12_detcoef
+ESO INS TEMP12 GRAD: ins_temp12_grad
+ESO INS TEMP12 ID: ins_temp12_id
+ESO INS TEMP12 LRCONST: ins_temp12_lrconst
+ESO INS TEMP12 LRRMS: ins_temp12_lrrms
+ESO INS TEMP12 MAX: ins_temp12_max
+ESO INS TEMP12 MEAN: ins_temp12_mean
+ESO INS TEMP12 MIN: ins_temp12_min
+ESO INS TEMP12 NAME: ins_temp12_name
+ESO INS TEMP12 RMS: ins_temp12_rms
+ESO INS TEMP12 VAL: ins_temp12_val
+ESO INS TEMP13 DETCOEF: ins_temp13_detcoef
+ESO INS TEMP13 GRAD: ins_temp13_grad
+ESO INS TEMP13 ID: ins_temp13_id
+ESO INS TEMP13 LRCONST: ins_temp13_lrconst
+ESO INS TEMP13 LRRMS: ins_temp13_lrrms
+ESO INS TEMP13 MAX: ins_temp13_max
+ESO INS TEMP13 MEAN: ins_temp13_mean
+ESO INS TEMP13 MIN: ins_temp13_min
+ESO INS TEMP13 NAME: ins_temp13_name
+ESO INS TEMP13 RMS: ins_temp13_rms
+ESO INS TEMP13 VAL: ins_temp13_val
+ESO INS TEMP14 DETCOEF: ins_temp14_detcoef
+ESO INS TEMP14 GRAD: ins_temp14_grad
+ESO INS TEMP14 ID: ins_temp14_id
+ESO INS TEMP14 LRCONST: ins_temp14_lrconst
+ESO INS TEMP14 LRRMS: ins_temp14_lrrms
+ESO INS TEMP14 MAX: ins_temp14_max
+ESO INS TEMP14 MEAN: ins_temp14_mean
+ESO INS TEMP14 MIN: ins_temp14_min
+ESO INS TEMP14 NAME: ins_temp14_name
+ESO INS TEMP14 RMS: ins_temp14_rms
+ESO INS TEMP14 VAL: ins_temp14_val
+ESO INS TEMP15 DETCOEF: ins_temp15_detcoef
+ESO INS TEMP15 GRAD: ins_temp15_grad
+ESO INS TEMP15 ID: ins_temp15_id
+ESO INS TEMP15 LRCONST: ins_temp15_lrconst
+ESO INS TEMP15 LRRMS: ins_temp15_lrrms
+ESO INS TEMP15 MAX: ins_temp15_max
+ESO INS TEMP15 MEAN: ins_temp15_mean
+ESO INS TEMP15 MIN: ins_temp15_min
+ESO INS TEMP15 NAME: ins_temp15_name
+ESO INS TEMP15 RMS: ins_temp15_rms
+ESO INS TEMP15 VAL: ins_temp15_val
+ESO INS TEMP16 DETCOEF: ins_temp16_detcoef
+ESO INS TEMP16 GRAD: ins_temp16_grad
+ESO INS TEMP16 ID: ins_temp16_id
+ESO INS TEMP16 LRCONST: ins_temp16_lrconst
+ESO INS TEMP16 LRRMS: ins_temp16_lrrms
+ESO INS TEMP16 MAX: ins_temp16_max
+ESO INS TEMP16 MEAN: ins_temp16_mean
+ESO INS TEMP16 MIN: ins_temp16_min
+ESO INS TEMP16 NAME: ins_temp16_name
+ESO INS TEMP16 RMS: ins_temp16_rms
+ESO INS TEMP16 VAL: ins_temp16_val
+ESO INS TEMP17 DETCOEF: ins_temp17_detcoef
+ESO INS TEMP17 GRAD: ins_temp17_grad
+ESO INS TEMP17 ID: ins_temp17_id
+ESO INS TEMP17 LRCONST: ins_temp17_lrconst
+ESO INS TEMP17 LRRMS: ins_temp17_lrrms
+ESO INS TEMP17 MAX: ins_temp17_max
+ESO INS TEMP17 MEAN: ins_temp17_mean
+ESO INS TEMP17 MIN: ins_temp17_min
+ESO INS TEMP17 NAME: ins_temp17_name
+ESO INS TEMP17 RMS: ins_temp17_rms
+ESO INS TEMP17 VAL: ins_temp17_val
+ESO INS TEMP18 DETCOEF: ins_temp18_detcoef
+ESO INS TEMP18 GRAD: ins_temp18_grad
+ESO INS TEMP18 ID: ins_temp18_id
+ESO INS TEMP18 LRCONST: ins_temp18_lrconst
+ESO INS TEMP18 LRRMS: ins_temp18_lrrms
+ESO INS TEMP18 MAX: ins_temp18_max
+ESO INS TEMP18 MEAN: ins_temp18_mean
+ESO INS TEMP18 MIN: ins_temp18_min
+ESO INS TEMP18 NAME: ins_temp18_name
+ESO INS TEMP18 RMS: ins_temp18_rms
+ESO INS TEMP18 VAL: ins_temp18_val
+ESO INS TEMP19 ID: ins_temp19_id
+ESO INS TEMP19 NAME: ins_temp19_name
+ESO INS TEMP19 VAL: ins_temp19_val
+ESO INS TEMP2 ID: ins_temp2_id
+ESO INS TEMP2 NAME: ins_temp2_name
+ESO INS TEMP2 VAL: ins_temp2_val
+ESO INS TEMP20 ID: ins_temp20_id
+ESO INS TEMP20 NAME: ins_temp20_name
+ESO INS TEMP20 VAL: ins_temp20_val
+ESO INS TEMP21 DETCOEF: ins_temp21_detcoef
+ESO INS TEMP21 GRAD: ins_temp21_grad
+ESO INS TEMP21 ID: ins_temp21_id
+ESO INS TEMP21 LRCONST: ins_temp21_lrconst
+ESO INS TEMP21 LRRMS: ins_temp21_lrrms
+ESO INS TEMP21 MAX: ins_temp21_max
+ESO INS TEMP21 MEAN: ins_temp21_mean
+ESO INS TEMP21 MIN: ins_temp21_min
+ESO INS TEMP21 NAME: ins_temp21_name
+ESO INS TEMP21 RMS: ins_temp21_rms
+ESO INS TEMP21 VAL: ins_temp21_val
+ESO INS TEMP22 DETCOEF: ins_temp22_detcoef
+ESO INS TEMP22 GRAD: ins_temp22_grad
+ESO INS TEMP22 ID: ins_temp22_id
+ESO INS TEMP22 LRCONST: ins_temp22_lrconst
+ESO INS TEMP22 LRRMS: ins_temp22_lrrms
+ESO INS TEMP22 MAX: ins_temp22_max
+ESO INS TEMP22 MEAN: ins_temp22_mean
+ESO INS TEMP22 MIN: ins_temp22_min
+ESO INS TEMP22 NAME: ins_temp22_name
+ESO INS TEMP22 RMS: ins_temp22_rms
+ESO INS TEMP22 VAL: ins_temp22_val
+ESO INS TEMP23 DETCOEF: ins_temp23_detcoef
+ESO INS TEMP23 GRAD: ins_temp23_grad
+ESO INS TEMP23 ID: ins_temp23_id
+ESO INS TEMP23 LRCONST: ins_temp23_lrconst
+ESO INS TEMP23 LRRMS: ins_temp23_lrrms
+ESO INS TEMP23 MAX: ins_temp23_max
+ESO INS TEMP23 MEAN: ins_temp23_mean
+ESO INS TEMP23 MIN: ins_temp23_min
+ESO INS TEMP23 NAME: ins_temp23_name
+ESO INS TEMP23 RMS: ins_temp23_rms
+ESO INS TEMP23 VAL: ins_temp23_val
+ESO INS TEMP24 DETCOEF: ins_temp24_detcoef
+ESO INS TEMP24 GRAD: ins_temp24_grad
+ESO INS TEMP24 ID: ins_temp24_id
+ESO INS TEMP24 LRCONST: ins_temp24_lrconst
+ESO INS TEMP24 LRRMS: ins_temp24_lrrms
+ESO INS TEMP24 MAX: ins_temp24_max
+ESO INS TEMP24 MEAN: ins_temp24_mean
+ESO INS TEMP24 MIN: ins_temp24_min
+ESO INS TEMP24 NAME: ins_temp24_name
+ESO INS TEMP24 RMS: ins_temp24_rms
+ESO INS TEMP24 VAL: ins_temp24_val
+ESO INS TEMP25 DETCOEF: ins_temp25_detcoef
+ESO INS TEMP25 GRAD: ins_temp25_grad
+ESO INS TEMP25 ID: ins_temp25_id
+ESO INS TEMP25 LRCONST: ins_temp25_lrconst
+ESO INS TEMP25 LRRMS: ins_temp25_lrrms
+ESO INS TEMP25 MAX: ins_temp25_max
+ESO INS TEMP25 MEAN: ins_temp25_mean
+ESO INS TEMP25 MIN: ins_temp25_min
+ESO INS TEMP25 NAME: ins_temp25_name
+ESO INS TEMP25 RMS: ins_temp25_rms
+ESO INS TEMP25 VAL: ins_temp25_val
+ESO INS TEMP26 DETCOEF: ins_temp26_detcoef
+ESO INS TEMP26 GRAD: ins_temp26_grad
+ESO INS TEMP26 ID: ins_temp26_id
+ESO INS TEMP26 LRCONST: ins_temp26_lrconst
+ESO INS TEMP26 LRRMS: ins_temp26_lrrms
+ESO INS TEMP26 MAX: ins_temp26_max
+ESO INS TEMP26 MEAN: ins_temp26_mean
+ESO INS TEMP26 MIN: ins_temp26_min
+ESO INS TEMP26 NAME: ins_temp26_name
+ESO INS TEMP26 RMS: ins_temp26_rms
+ESO INS TEMP26 VAL: ins_temp26_val
+ESO INS TEMP27 DETCOEF: ins_temp27_detcoef
+ESO INS TEMP27 GRAD: ins_temp27_grad
+ESO INS TEMP27 ID: ins_temp27_id
+ESO INS TEMP27 LRCONST: ins_temp27_lrconst
+ESO INS TEMP27 LRRMS: ins_temp27_lrrms
+ESO INS TEMP27 MAX: ins_temp27_max
+ESO INS TEMP27 MEAN: ins_temp27_mean
+ESO INS TEMP27 MIN: ins_temp27_min
+ESO INS TEMP27 NAME: ins_temp27_name
+ESO INS TEMP27 RMS: ins_temp27_rms
+ESO INS TEMP27 VAL: ins_temp27_val
+ESO INS TEMP28 DETCOEF: ins_temp28_detcoef
+ESO INS TEMP28 GRAD: ins_temp28_grad
+ESO INS TEMP28 ID: ins_temp28_id
+ESO INS TEMP28 LRCONST: ins_temp28_lrconst
+ESO INS TEMP28 LRRMS: ins_temp28_lrrms
+ESO INS TEMP28 MAX: ins_temp28_max
+ESO INS TEMP28 MEAN: ins_temp28_mean
+ESO INS TEMP28 MIN: ins_temp28_min
+ESO INS TEMP28 NAME: ins_temp28_name
+ESO INS TEMP28 RMS: ins_temp28_rms
+ESO INS TEMP28 VAL: ins_temp28_val
+ESO INS TEMP29 DETCOEF: ins_temp29_detcoef
+ESO INS TEMP29 GRAD: ins_temp29_grad
+ESO INS TEMP29 ID: ins_temp29_id
+ESO INS TEMP29 LRCONST: ins_temp29_lrconst
+ESO INS TEMP29 LRRMS: ins_temp29_lrrms
+ESO INS TEMP29 MAX: ins_temp29_max
+ESO INS TEMP29 MEAN: ins_temp29_mean
+ESO INS TEMP29 MIN: ins_temp29_min
+ESO INS TEMP29 NAME: ins_temp29_name
+ESO INS TEMP29 RMS: ins_temp29_rms
+ESO INS TEMP29 VAL: ins_temp29_val
+ESO INS TEMP3 DETCOEF: ins_temp3_detcoef
+ESO INS TEMP3 GRAD: ins_temp3_grad
+ESO INS TEMP3 ID: ins_temp3_id
+ESO INS TEMP3 LRCONST: ins_temp3_lrconst
+ESO INS TEMP3 LRRMS: ins_temp3_lrrms
+ESO INS TEMP3 MAX: ins_temp3_max
+ESO INS TEMP3 MEAN: ins_temp3_mean
+ESO INS TEMP3 MIN: ins_temp3_min
+ESO INS TEMP3 NAME: ins_temp3_name
+ESO INS TEMP3 RMS: ins_temp3_rms
+ESO INS TEMP3 VAL: ins_temp3_val
+ESO INS TEMP30 DETCOEF: ins_temp30_detcoef
+ESO INS TEMP30 GRAD: ins_temp30_grad
+ESO INS TEMP30 ID: ins_temp30_id
+ESO INS TEMP30 LRCONST: ins_temp30_lrconst
+ESO INS TEMP30 LRRMS: ins_temp30_lrrms
+ESO INS TEMP30 MAX: ins_temp30_max
+ESO INS TEMP30 MEAN: ins_temp30_mean
+ESO INS TEMP30 MIN: ins_temp30_min
+ESO INS TEMP30 NAME: ins_temp30_name
+ESO INS TEMP30 RMS: ins_temp30_rms
+ESO INS TEMP30 VAL: ins_temp30_val
+ESO INS TEMP31 DETCOEF: ins_temp31_detcoef
+ESO INS TEMP31 GRAD: ins_temp31_grad
+ESO INS TEMP31 ID: ins_temp31_id
+ESO INS TEMP31 LRCONST: ins_temp31_lrconst
+ESO INS TEMP31 LRRMS: ins_temp31_lrrms
+ESO INS TEMP31 MAX: ins_temp31_max
+ESO INS TEMP31 MEAN: ins_temp31_mean
+ESO INS TEMP31 MIN: ins_temp31_min
+ESO INS TEMP31 NAME: ins_temp31_name
+ESO INS TEMP31 RMS: ins_temp31_rms
+ESO INS TEMP31 VAL: ins_temp31_val
+ESO INS TEMP32 DETCOEF: ins_temp32_detcoef
+ESO INS TEMP32 GRAD: ins_temp32_grad
+ESO INS TEMP32 ID: ins_temp32_id
+ESO INS TEMP32 LRCONST: ins_temp32_lrconst
+ESO INS TEMP32 LRRMS: ins_temp32_lrrms
+ESO INS TEMP32 MAX: ins_temp32_max
+ESO INS TEMP32 MEAN: ins_temp32_mean
+ESO INS TEMP32 MIN: ins_temp32_min
+ESO INS TEMP32 NAME: ins_temp32_name
+ESO INS TEMP32 RMS: ins_temp32_rms
+ESO INS TEMP32 VAL: ins_temp32_val
+ESO INS TEMP33 DETCOEF: ins_temp33_detcoef
+ESO INS TEMP33 GRAD: ins_temp33_grad
+ESO INS TEMP33 ID: ins_temp33_id
+ESO INS TEMP33 LRCONST: ins_temp33_lrconst
+ESO INS TEMP33 LRRMS: ins_temp33_lrrms
+ESO INS TEMP33 MAX: ins_temp33_max
+ESO INS TEMP33 MEAN: ins_temp33_mean
+ESO INS TEMP33 MIN: ins_temp33_min
+ESO INS TEMP33 NAME: ins_temp33_name
+ESO INS TEMP33 RMS: ins_temp33_rms
+ESO INS TEMP33 VAL: ins_temp33_val
+ESO INS TEMP34 DETCOEF: ins_temp34_detcoef
+ESO INS TEMP34 GRAD: ins_temp34_grad
+ESO INS TEMP34 ID: ins_temp34_id
+ESO INS TEMP34 LRCONST: ins_temp34_lrconst
+ESO INS TEMP34 LRRMS: ins_temp34_lrrms
+ESO INS TEMP34 MAX: ins_temp34_max
+ESO INS TEMP34 MEAN: ins_temp34_mean
+ESO INS TEMP34 MIN: ins_temp34_min
+ESO INS TEMP34 NAME: ins_temp34_name
+ESO INS TEMP34 RMS: ins_temp34_rms
+ESO INS TEMP34 VAL: ins_temp34_val
+ESO INS TEMP35 DETCOEF: ins_temp35_detcoef
+ESO INS TEMP35 GRAD: ins_temp35_grad
+ESO INS TEMP35 ID: ins_temp35_id
+ESO INS TEMP35 LRCONST: ins_temp35_lrconst
+ESO INS TEMP35 LRRMS: ins_temp35_lrrms
+ESO INS TEMP35 MAX: ins_temp35_max
+ESO INS TEMP35 MEAN: ins_temp35_mean
+ESO INS TEMP35 MIN: ins_temp35_min
+ESO INS TEMP35 NAME: ins_temp35_name
+ESO INS TEMP35 RMS: ins_temp35_rms
+ESO INS TEMP35 VAL: ins_temp35_val
+ESO INS TEMP36 DETCOEF: ins_temp36_detcoef
+ESO INS TEMP36 GRAD: ins_temp36_grad
+ESO INS TEMP36 ID: ins_temp36_id
+ESO INS TEMP36 LRCONST: ins_temp36_lrconst
+ESO INS TEMP36 LRRMS: ins_temp36_lrrms
+ESO INS TEMP36 MAX: ins_temp36_max
+ESO INS TEMP36 MEAN: ins_temp36_mean
+ESO INS TEMP36 MIN: ins_temp36_min
+ESO INS TEMP36 NAME: ins_temp36_name
+ESO INS TEMP36 RMS: ins_temp36_rms
+ESO INS TEMP36 VAL: ins_temp36_val
+ESO INS TEMP37 DETCOEF: ins_temp37_detcoef
+ESO INS TEMP37 GRAD: ins_temp37_grad
+ESO INS TEMP37 ID: ins_temp37_id
+ESO INS TEMP37 LRCONST: ins_temp37_lrconst
+ESO INS TEMP37 LRRMS: ins_temp37_lrrms
+ESO INS TEMP37 MAX: ins_temp37_max
+ESO INS TEMP37 MEAN: ins_temp37_mean
+ESO INS TEMP37 MIN: ins_temp37_min
+ESO INS TEMP37 NAME: ins_temp37_name
+ESO INS TEMP37 RMS: ins_temp37_rms
+ESO INS TEMP37 VAL: ins_temp37_val
+ESO INS TEMP38 ID: ins_temp38_id
+ESO INS TEMP38 NAME: ins_temp38_name
+ESO INS TEMP38 VAL: ins_temp38_val
+ESO INS TEMP4 DETCOEF: ins_temp4_detcoef
+ESO INS TEMP4 GRAD: ins_temp4_grad
+ESO INS TEMP4 ID: ins_temp4_id
+ESO INS TEMP4 LRCONST: ins_temp4_lrconst
+ESO INS TEMP4 LRRMS: ins_temp4_lrrms
+ESO INS TEMP4 MAX: ins_temp4_max
+ESO INS TEMP4 MEAN: ins_temp4_mean
+ESO INS TEMP4 MIN: ins_temp4_min
+ESO INS TEMP4 NAME: ins_temp4_name
+ESO INS TEMP4 RMS: ins_temp4_rms
+ESO INS TEMP4 VAL: ins_temp4_val
+ESO INS TEMP40 DETCOEF: ins_temp40_detcoef
+ESO INS TEMP40 GRAD: ins_temp40_grad
+ESO INS TEMP40 ID: ins_temp40_id
+ESO INS TEMP40 LRCONST: ins_temp40_lrconst
+ESO INS TEMP40 LRRMS: ins_temp40_lrrms
+ESO INS TEMP40 MAX: ins_temp40_max
+ESO INS TEMP40 MEAN: ins_temp40_mean
+ESO INS TEMP40 MIN: ins_temp40_min
+ESO INS TEMP40 NAME: ins_temp40_name
+ESO INS TEMP40 RMS: ins_temp40_rms
+ESO INS TEMP40 VAL: ins_temp40_val
+ESO INS TEMP41 DETCOEF: ins_temp41_detcoef
+ESO INS TEMP41 GRAD: ins_temp41_grad
+ESO INS TEMP41 ID: ins_temp41_id
+ESO INS TEMP41 LRCONST: ins_temp41_lrconst
+ESO INS TEMP41 LRRMS: ins_temp41_lrrms
+ESO INS TEMP41 MAX: ins_temp41_max
+ESO INS TEMP41 MEAN: ins_temp41_mean
+ESO INS TEMP41 MIN: ins_temp41_min
+ESO INS TEMP41 NAME: ins_temp41_name
+ESO INS TEMP41 RMS: ins_temp41_rms
+ESO INS TEMP41 VAL: ins_temp41_val
+ESO INS TEMP42 DETCOEF: ins_temp42_detcoef
+ESO INS TEMP42 GRAD: ins_temp42_grad
+ESO INS TEMP42 ID: ins_temp42_id
+ESO INS TEMP42 LRCONST: ins_temp42_lrconst
+ESO INS TEMP42 LRRMS: ins_temp42_lrrms
+ESO INS TEMP42 MAX: ins_temp42_max
+ESO INS TEMP42 MEAN: ins_temp42_mean
+ESO INS TEMP42 MIN: ins_temp42_min
+ESO INS TEMP42 NAME: ins_temp42_name
+ESO INS TEMP42 RMS: ins_temp42_rms
+ESO INS TEMP42 VAL: ins_temp42_val
+ESO INS TEMP43 DETCOEF: ins_temp43_detcoef
+ESO INS TEMP43 GRAD: ins_temp43_grad
+ESO INS TEMP43 ID: ins_temp43_id
+ESO INS TEMP43 LRCONST: ins_temp43_lrconst
+ESO INS TEMP43 LRRMS: ins_temp43_lrrms
+ESO INS TEMP43 MAX: ins_temp43_max
+ESO INS TEMP43 MEAN: ins_temp43_mean
+ESO INS TEMP43 MIN: ins_temp43_min
+ESO INS TEMP43 NAME: ins_temp43_name
+ESO INS TEMP43 RMS: ins_temp43_rms
+ESO INS TEMP43 VAL: ins_temp43_val
+ESO INS TEMP44 DETCOEF: ins_temp44_detcoef
+ESO INS TEMP44 GRAD: ins_temp44_grad
+ESO INS TEMP44 ID: ins_temp44_id
+ESO INS TEMP44 LRCONST: ins_temp44_lrconst
+ESO INS TEMP44 LRRMS: ins_temp44_lrrms
+ESO INS TEMP44 MAX: ins_temp44_max
+ESO INS TEMP44 MEAN: ins_temp44_mean
+ESO INS TEMP44 MIN: ins_temp44_min
+ESO INS TEMP44 NAME: ins_temp44_name
+ESO INS TEMP44 RMS: ins_temp44_rms
+ESO INS TEMP44 VAL: ins_temp44_val
+ESO INS TEMP5 DETCOEF: ins_temp5_detcoef
+ESO INS TEMP5 GRAD: ins_temp5_grad
+ESO INS TEMP5 ID: ins_temp5_id
+ESO INS TEMP5 LRCONST: ins_temp5_lrconst
+ESO INS TEMP5 LRRMS: ins_temp5_lrrms
+ESO INS TEMP5 MAX: ins_temp5_max
+ESO INS TEMP5 MEAN: ins_temp5_mean
+ESO INS TEMP5 MIN: ins_temp5_min
+ESO INS TEMP5 NAME: ins_temp5_name
+ESO INS TEMP5 RMS: ins_temp5_rms
+ESO INS TEMP5 VAL: ins_temp5_val
+ESO INS TEMP6 DETCOEF: ins_temp6_detcoef
+ESO INS TEMP6 GRAD: ins_temp6_grad
+ESO INS TEMP6 ID: ins_temp6_id
+ESO INS TEMP6 LRCONST: ins_temp6_lrconst
+ESO INS TEMP6 LRRMS: ins_temp6_lrrms
+ESO INS TEMP6 MAX: ins_temp6_max
+ESO INS TEMP6 MEAN: ins_temp6_mean
+ESO INS TEMP6 MIN: ins_temp6_min
+ESO INS TEMP6 NAME: ins_temp6_name
+ESO INS TEMP6 RMS: ins_temp6_rms
+ESO INS TEMP6 VAL: ins_temp6_val
+ESO INS TEMP7 DETCOEF: ins_temp7_detcoef
+ESO INS TEMP7 GRAD: ins_temp7_grad
+ESO INS TEMP7 ID: ins_temp7_id
+ESO INS TEMP7 LRCONST: ins_temp7_lrconst
+ESO INS TEMP7 LRRMS: ins_temp7_lrrms
+ESO INS TEMP7 MAX: ins_temp7_max
+ESO INS TEMP7 MEAN: ins_temp7_mean
+ESO INS TEMP7 MIN: ins_temp7_min
+ESO INS TEMP7 NAME: ins_temp7_name
+ESO INS TEMP7 RMS: ins_temp7_rms
+ESO INS TEMP7 VAL: ins_temp7_val
+ESO INS TEMP8 DETCOEF: ins_temp8_detcoef
+ESO INS TEMP8 GRAD: ins_temp8_grad
+ESO INS TEMP8 ID: ins_temp8_id
+ESO INS TEMP8 LRCONST: ins_temp8_lrconst
+ESO INS TEMP8 LRRMS: ins_temp8_lrrms
+ESO INS TEMP8 MAX: ins_temp8_max
+ESO INS TEMP8 MEAN: ins_temp8_mean
+ESO INS TEMP8 MIN: ins_temp8_min
+ESO INS TEMP8 NAME: ins_temp8_name
+ESO INS TEMP8 RMS: ins_temp8_rms
+ESO INS TEMP8 VAL: ins_temp8_val
+ESO INS TEMP9 DETCOEF: ins_temp9_detcoef
+ESO INS TEMP9 GRAD: ins_temp9_grad
+ESO INS TEMP9 ID: ins_temp9_id
+ESO INS TEMP9 LRCONST: ins_temp9_lrconst
+ESO INS TEMP9 LRRMS: ins_temp9_lrrms
+ESO INS TEMP9 MAX: ins_temp9_max
+ESO INS TEMP9 MEAN: ins_temp9_mean
+ESO INS TEMP9 MIN: ins_temp9_min
+ESO INS TEMP9 NAME: ins_temp9_name
+ESO INS TEMP9 RMS: ins_temp9_rms
+ESO INS TEMP9 VAL: ins_temp9_val
+ESO OBS DID: obs_did
+ESO OBS GRP: obs_grp
+ESO OBS ID: obs_id
+ESO OBS NAME: obs_name
+ESO OBS PI-COI ID: obs_pi_coi_id
+ESO OBS PI-COI NAME: obs_pi_coi_name
+ESO OBS PROG ID: obs_prog_id
+ESO OBS START: obs_start
+ESO OBS TARG NAME: obs_targ_name
+ESO OBS TPLNO: obs_tplno
+ESO OCS DET1 IMGNAME: ocs_det1_imgname
+ESO OCS DET1 NAMING: ocs_det1_naming
+ESO TEL AIRM END: tel_airm_end
+ESO TEL AIRM START: tel_airm_start
+ESO TEL ALT: tel_alt
+ESO TEL AMBI FWHM END: tel_ambi_fwhm_end
+ESO TEL AMBI FWHM START: tel_ambi_fwhm_start
+ESO TEL AMBI PRES END: tel_ambi_pres_end
+ESO TEL AMBI PRES START: tel_ambi_pres_start
+ESO TEL AMBI RHUM: tel_ambi_rhum
+ESO TEL AMBI TEMP: tel_ambi_temp
+ESO TEL AMBI WINDDIR: tel_ambi_winddir
+ESO TEL AMBI WINDSP: tel_ambi_windsp
+ESO TEL AZ: tel_az
+ESO TEL CHOP ST: tel_chop_st
+ESO TEL DATE: tel_date
+ESO TEL DID: tel_did
+ESO TEL DOME STATUS: tel_dome_status
+ESO TEL FOCU ID: tel_focu_id
+ESO TEL FOCU LEN: tel_focu_len
+ESO TEL FOCU SCALE: tel_focu_scale
+ESO TEL FOCU VALUE: tel_focu_value
+ESO TEL GEOELEV: tel_geoelev
+ESO TEL GEOLAT: tel_geolat
+ESO TEL GEOLON: tel_geolon
+ESO TEL ID: tel_id
+ESO TEL MOON DEC: tel_moon_dec
+ESO TEL MOON RA: tel_moon_ra
+ESO TEL OPER: tel_oper
+ESO TEL PARANG END: tel_parang_end
+ESO TEL PARANG START: tel_parang_start
+ESO TEL TARG ALPHA: tel_targ_alpha
+ESO TEL TARG COORDTYPE: tel_targ_coordtype
+ESO TEL TARG DELTA: tel_targ_delta
+ESO TEL TARG EPOCH: tel_targ_epoch
+ESO TEL TARG EPOCHSYSTEM: tel_targ_epochsystem
+ESO TEL TARG EQUINOX: tel_targ_equinox
+ESO TEL TARG PARALLAX: tel_targ_parallax
+ESO TEL TARG PMA: tel_targ_pma
+ESO TEL TARG PMD: tel_targ_pmd
+ESO TEL TARG RADVEL: tel_targ_radvel
+ESO TEL TH M1 TEMP: tel_th_m1_temp
+ESO TEL TRAK STATUS: tel_trak_status
+ESO TPL DID: tpl_did
+ESO TPL EXPNO: tpl_expno
+ESO TPL ID: tpl_id
+ESO TPL NAME: tpl_name
+ESO TPL NEXP: tpl_nexp
+ESO TPL PRESEQ: tpl_preseq
+ESO TPL START: tpl_start
+ESO TPL VERSION: tpl_version
+EXPTIME: exptime
+EXTEND: extend
+INSTRUME: instrume
+LST: lst
+MJD-OBS: mjd_obs
+NAXIS: naxis
+NAXIS1: naxis1
+OBJECT: object
+ORIGFILE: origfile
+ORIGIN: origin
+PI-COI: pi_coi
+RA: ra
+RADECSYS: radecsys
+SIMPLE: simple
+TELESCOP: telescop
+UTC: utc
