@@ -13,11 +13,16 @@ from glob import glob
 from astropy.io import fits
 
 
+# Database credentials
+dirname = os.path.dirname(__file__)
+with open(os.path.join(dirname, "credentials.yaml"), "r") as fp:
+    credentials = yaml.load(fp)
+
 # Find the relevant *_bis_G2_A.fits files.
-filenames = glob("data/harps-spectra/259094/data/reduced/*/*_bis_G2_A.fits")
+filenames = glob("data/spectra/data/reduced/*/*_bis_G2_A.fits")
 
 # Get translators for the column/header names.
-with open(os.path.join(os.path.dirname(__file__), "obs-columns.yaml"), "r") as fp:
+with open(os.path.join(dirname, "obs-columns.yaml"), "r") as fp:
     columns = yaml.load(fp)
 
     column_names = ", ".join(columns.values())
@@ -34,7 +39,7 @@ def ingest(filename):
 
     print("Ingesting from {}".format(filename))
 
-    connection = pg.connect(database="orchestra")
+    connection = pg.connect(**credentials)
     cursor = connection.cursor()
 
     with fits.open(filename) as image:

@@ -8,3 +8,5 @@ data/
 
 scripts/download_spectra.sh
 scripts/cache/
+
+db/credentials.yaml
