@@ -28,13 +28,10 @@ import cPickle as pickle
 import os
 import re
 import time
-import astropy.coordinates as coord
-import astropy.units as u
 from astropy.extern.six import BytesIO
-from astropy.table import Table, vstack
+from astropy.table import Table
 from astroquery.eso import Eso as ESO 
 from astroquery.eso.core import _check_response
-from glob import glob
 
 
 # Load local catalog of positions.
@@ -161,7 +158,13 @@ for i, target in enumerate(local_catalog):
         continue
 
     # Search the ESO archive for HARPS data.
-    response = query_harps_phase3_by_position(target["RA"], target["Dec"])
+    try:
+        response = query_harps_phase3_by_position(target["RA"], target["Dec"])
+    
+    except ValueError:
+        failures[target["Name"]] = "ValueError: only one result?"
+        print("ValueError: Only one result for {}?".format(target["Name"]))
+        continue
 
     if response is None:
         print("No results found for star name {}".format(target["Name"]))
@@ -192,7 +195,6 @@ for i, target in enumerate(local_catalog):
     response.write(eso_catalog_path, overwrite=True)
     print("Saved dataset records to {}".format(eso_catalog_path))
 
-
+# Save any warnings or failures.
 with open(os.path.join(cwd, "eso-search-phase3.pkl"), "wb") as fp:
     pickle.dump((warnings, failures), fp, -1)
-
