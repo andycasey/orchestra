@@ -194,5 +194,5 @@ for i, target in enumerate(local_catalog):
 
 
 with open(os.path.join(cwd, "eso-search-phase3.pkl"), "wb") as fp:
-    fp.write((warnings, failures), fp, -1)
+    pickle.dump((warnings, failures), fp, -1)
 
