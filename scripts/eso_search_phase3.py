@@ -24,11 +24,11 @@ __author__ = "Andrew R. Casey <arc@ast.cam.ac.uk>"
 
 # This script also requires 'keyring.alt' package (available through pip)
 
-import cPickle as pickle
 import os
+import pg
 import re
 import time
-from astropy.extern.six import BytesIO
+from astropy.extern.six import BytesIO, cPickle as pickle
 from astropy.table import Table
 from astroquery.eso import Eso as ESO 
 from astroquery.eso.core import _check_response
@@ -45,6 +45,10 @@ eso.ROW_LIMIT = 100000 # Maximum possible number of observations per star
 cwd = os.path.dirname(os.path.realpath(__file__))
 catalog_dir = "{}/../data/eso-phase3-products/".format(cwd)
 
+# Connect to the PostgreSQL database.
+with open("db/credentials.yaml", "r") as fp:
+    credentials = yaml.load(fp)
+connection = pg.connect(**credentials)
 
 def query_harps_phase3_by_position(ra, dec, **kwargs):
     """
@@ -191,10 +195,38 @@ for i, target in enumerate(local_catalog):
             target["N_exp"], K)
         print("Warning: Expected {} and found {}".format(target["N_exp"], K))
 
-    # Save the catalog.
-    response.write(eso_catalog_path, overwrite=True)
-    print("Saved dataset records to {}".format(eso_catalog_path))
+    # Ingest the catalog.
+    print("Ingesting {} Phase 3 records from {}".format(len(response), filename))
+    
+    for record in response:
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT EXISTS(SELECT 1 FROM phase3_products WHERE arcfile=%s)""",
+            (record["ARCFILE"], ))
+        exists, = cursor.fetchone()
+
+        if not exists:
+            try:
+                cursor.execute(
+                    """INSERT INTO phase3_products (arcfile, object, ra, dec,
+                        wavelength, snr, resolution, instrument, date_obs,
+                        exptime, program_id, origfile, dataset) VALUES (%s, %s, 
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    [record[k] for k in record.dtype.names])
+
+            except pg.IntegrityError:
+                logging.exception("IntegrityError on {}/{}:\n{}\n".format(
+                    filename, record["ARCFILE"], record))
+                connection.rollback()
+
+            else:
+                connection.commit()
+
+        cursor.close()
+
+# Close the PostgreSQL database.
+connection.close()
 
 # Save any warnings or failures.
-with open(os.path.join(cwd, "eso-search-phase3.pkl"), "wb") as fp:
+with open(os.path.join(cwd, "eso-search-phase3-output.pkl"), "wb") as fp:
     pickle.dump((warnings, failures), fp, -1)

@@ -20,67 +20,7 @@ dirname = os.path.dirname(__file__)
 with open(os.path.join(dirname, "credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 
-#----------------------------------------------------------
-#   Results from Phase 3 product searches
-#----------------------------------------------------------
-
-# Find relevant ESO Phase 3 product catalogs
-phase3_filenames = glob("data/eso-phase3-products/*.fits")
-
-def ingest_phase3_catalog(filename):
-    """
-    Ingest records from a table containing records from the ESO Phase 3 archive.
-    These tables were produced by the `scripts/eso_search_phase3.py` file.
-
-    :param filename:
-        The local path of the catalog file.
-    """
-
-    table = Table.read(filename)
-
-    print("Ingesting {} Phase 3 records from {}".format(len(table), filename))
-    connection = pg.connect(**credentials)
-
-    for record in table:
-        
-        cursor = connection.cursor()
-        cursor.execute(
-            """SELECT EXISTS(SELECT 1 FROM phase3_products WHERE arcfile=%s)""",
-            (record["ARCFILE"], ))
-        exists, = cursor.fetchone()
-
-        if not exists:
-            try:
-                cursor.execute(
-                    """INSERT INTO phase3_products (arcfile, object, ra, dec,
-                        wavelength, snr, resolution, instrument, date_obs,
-                        exptime, program_id, origfile, dataset) VALUES (%s, %s, 
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                    [record[k] for k in record.dtype.names])
-
-            except pg.IntegrityError:
-                logging.exception("IntegrityError on {}/{}:\n{}\n".format(
-                    filename, record["ARCFILE"], record))
-                connection.rollback()
-
-            else:
-                connection.commit()
-
-        cursor.close()
-    connection.close()
-
-    return None
-
-
-# Ingest the headers from each file.
-pool = mp.Pool(20)
-r = pool.map_async(ingest_phase3_catalog, phase3_filenames).get()
-pool.close()
-pool.join()
-
-raise a
-
-
+   
 #----------------------------------------------------------
 #   Headers from reduced data products
 #----------------------------------------------------------
