@@ -29,7 +29,7 @@ def _triangular_filter(wave, center, fwhm):
         An array the same length of `wave` with entries between 0.0 and 1.0.
     """
 
-    return np.clip(1.0 - (1./fwhm) * np.abs(wave - center), 0.0, np.inf)
+    return np.clip(1.0 - (1./fwhm) * np.abs(wave - center), 0.0, 1.0)
 
 
 def shk_index(wave, flux, rv):
