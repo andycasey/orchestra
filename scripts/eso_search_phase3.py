@@ -25,9 +25,11 @@ __author__ = "Andrew R. Casey <arc@ast.cam.ac.uk>"
 # This script also requires 'keyring.alt' package (available through pip)
 
 import os
+import logging
 import pg
 import re
 import time
+import yaml
 from astropy.extern.six import BytesIO, cPickle as pickle
 from astropy.table import Table
 from astroquery.eso import Eso as ESO 
@@ -42,11 +44,9 @@ eso = ESO()
 eso.login("andycasey")
 eso.ROW_LIMIT = 100000 # Maximum possible number of observations per star
 
-cwd = os.path.dirname(os.path.realpath(__file__))
-catalog_dir = "{}/../data/eso-phase3-products/".format(cwd)
-
 # Connect to the PostgreSQL database.
-with open("db/credentials.yaml", "r") as fp:
+cwd = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 connection = pg.connect(**credentials)
 
@@ -143,23 +143,6 @@ failures = {}
 M, N = (0, len(local_catalog))
 
 for i, target in enumerate(local_catalog):
-
-    eso_catalog_path = os.path.join(
-        catalog_dir, "eso-{}.fits".format(target["Name"]))
-
-    if os.path.exists(eso_catalog_path):
-        print("Skipping {} because {} exists".format(
-            target["Name"], eso_catalog_path))
-
-        t = Table.read(eso_catalog_path)
-        K = len(t)
-        M += K
-
-        if target["N_exp"] > K:
-            warnings[target["Name"]] = "Expected {}; found {}".format(
-                target["N_exp"], K)
-            print("Warning: Expected {} and found {}".format(target["N_exp"], K))
-        continue
 
     # Search the ESO archive for HARPS data.
     try:
