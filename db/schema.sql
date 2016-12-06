@@ -19,6 +19,10 @@ CREATE TABLE phase3_products (
     dataset text
 );
 
+# Create Q3C indices
+CREATE INDEX ON phase3_products (q3c_ang2ipix(ra, dec));
+CLUSTER phase3_products_q3c_ang2ipix_idx ON phase3_products;
+ANALYZE phase3_products;
 
 /*
     Python code to generate schema for obs table:
@@ -44,6 +48,7 @@ CREATE TABLE phase3_products (
 DROP TABLE IF EXISTS obs;
 CREATE TABLE obs (
     date_obs text PRIMARY KEY,
+    filename text,
     simple boolean,
     bitpix integer,
     naxis integer,
@@ -933,11 +938,6 @@ CREATE TABLE obs (
     drs_flux_corr_coeff5 numeric
 );
 
-
-# Create Q3C indices
-CREATE INDEX ON phase3_products (q3c_ang2ipix(ra, dec));
-CLUSTER phase3_products_q3c_ang2ipix_idx ON phase3_products;
-ANALYZE phase3_products;
 
 CREATE INDEX ON obs (q3c_ang2ipix(ra, dec));
 CLUSTER obs_q3c_ang2ipix_idx ON obs;

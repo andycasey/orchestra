@@ -7,7 +7,7 @@ paper/ms.aux
 data/
 
 scripts/download_spectra.sh
-scripts/eso-search-phase3-output.pkl
-scripts/cache/
+
+*.pkl
 
 db/credentials.yaml

@@ -25,7 +25,7 @@ from astroquery.eso import Eso as ESO
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
-SKIP = 1 # Skip how batches at the start?
+SKIP = 0 # Skip how batches at the start?
 BATCH = 10000 # How many datasets should we get per ESO request?
 WAIT_TIME = 60 # Seconds between asking ESO if they have prepared our request
 DATA_DIR = "{}/../data/spectra/".format(cwd) # Where's the spectra at?
@@ -111,6 +111,10 @@ for i, request_number in enumerate(request_numbers):
 
     print("Retrieving remote paths for request number {}/{}".format(i + 1, N))
 
+    # Login to ESO.
+    eso = ESO()
+    eso.login("andycasey")
+
     # Check if ESO is ready for us.
     while True:    
         check_state = eso._request("GET", "{}/{}".format(url, request_number))
@@ -118,7 +122,7 @@ for i, request_number in enumerate(request_numbers):
 
         span = root.find(id="requestState")
         print("Current state {} on request {} ({}/{})".format(
-            span.text, request_number, i, N))
+            span.text, request_number, i + 1, N))
 
         if span.text != "COMPLETE":
             print("Sleeping for {} seconds..".format(WAIT_TIME))
@@ -144,11 +148,11 @@ for i, request_number in enumerate(request_numbers):
         os.remove(cached_file)
 
 # Prepare the script for downloading.
-script_path = os.path.join(DATA_DIR, "download_spectra.sh")
 template_path = os.path.join(cwd, "download_template.sh")
 with open(template_path, "r") as fp:
     contents = fp.read()
 
+script_path = os.path.join(DATA_DIR, "download_spectra.sh")
 with open(script_path, "w") as fp:
     fp.write(contents.replace("$$REMOTE_PATHS$$", "\n".join(remote_paths)))
 
@@ -157,8 +161,8 @@ OK now do:
     cd "{}"
     sh download_spectra.sh
 
-Then untar everything with:
-    ls -lh *.tar | awk '{{print "tar -xvf \"" $9 "\" --keep-old-files --force-local "}}' > untar.sh
+Then untar everything new with:
+    grep tar download_spectra.sh | awk '{print "tar -xvf " $1 " --keep-old-files --force-local "}' > untar.sh
     sh untar.sh
 
 Then ingest everything by running:
