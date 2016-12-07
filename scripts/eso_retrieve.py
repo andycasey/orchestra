@@ -175,7 +175,8 @@ Then untar everything new with:
 
 Then ingest everything by running:
     cd "{}"
-    python db/ingest.py
+    python scripts/correct_folder_structure.py
+    python scripts/db_ingest_headers.py
 """.format(
     os.path.realpath(DATA_DIR),
     os.path.realpath(os.path.join(cwd, ".."))))
