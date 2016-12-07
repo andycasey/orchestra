@@ -154,6 +154,9 @@ for i in range(I):
     for cached_file in glob(os.path.join(eso.cache_location, "*")):
         os.remove(cached_file)
     
+    # We have all the remote paths for this request. At ESO's advice, let's
+    # wait another 60 seconds before starting our new request.
+    time.sleep(60)
 
 # Prepare the script for downloading.
 template_path = os.path.join(cwd, "download_template.sh")
