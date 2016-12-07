@@ -2,7 +2,6 @@
 """
 Retrieve reduced and intermediate HARPS data products from the ESO archive.
 
-This script will connect to 
 
 This script will download catalog files for each object which contain the 
 Phase 3 identifier required to download the reduced and intermediate data
@@ -27,7 +26,7 @@ from astroquery.eso import Eso as ESO
 cwd = os.path.dirname(os.path.realpath(__file__))
 
 SKIP = 0 # Skip how many batches at the start? (for if you are re-running this..)
-BATCH = 2500 # How many datasets should we get per ESO request?
+BATCH = 2000 # How many datasets should we get per ESO request?
 WAIT_TIME = 60 # Seconds between asking ESO if they have prepared our request
 DATA_DIR = "{}/../data/spectra/".format(cwd) # Where's the spectra at?
 
