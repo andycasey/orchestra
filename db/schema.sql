@@ -942,3 +942,13 @@ CREATE TABLE obs (
 CREATE INDEX ON obs (q3c_ang2ipix(ra, dec));
 CLUSTER obs_q3c_ang2ipix_idx ON obs;
 ANALYZE obs;
+
+
+DROP TABLE IF EXISTS stellar_activity;
+CREATE TABLE stellar_activity (
+    date_obs text PRIMARY KEY,
+    filename text not null,
+    git_hash text not null,
+    s_hk numeric,
+    e_s_hk numeric
+);
