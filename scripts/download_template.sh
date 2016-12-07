@@ -14,7 +14,7 @@ __EOF__
 }
 
 username=andycasey
-xargsopts=-n 1 -P 8
+xargsopts="-n 1 -P 8"
 prompt=
 list=
 while getopts hlpu:xX:d: option

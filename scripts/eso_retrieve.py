@@ -165,7 +165,7 @@ OK now do:
     sh download_spectra.sh
 
 Then untar everything new with:
-    grep tar download_spectra.sh | awk '{n=split($1,a,"/"); print "tar -xvf \"" a[n] " --keep-old-files --force-local "}' > untar.sh
+    grep tar download_spectra.sh | awk '{{n=split($1,a,"/"); print "tar -xvf \"" a[n] " --keep-old-files --force-local "}}' > untar.sh
     sh untar.sh
 
 Then ingest everything by running:
