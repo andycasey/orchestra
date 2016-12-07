@@ -95,21 +95,17 @@ for i in range(I):
     _ = re.findall("Request #[0-9]+\w", confirmation_response.text)[0].split()[-1]
     request_number = int(_.lstrip("#"))
 
-    # Remove anything from the astroquery cache.
-    for cached_file in glob(os.path.join(eso.cache_location, "*")):
-        os.remove(cached_file)
-
     # Get the download scripts for our request number.
     url = "https://dataportal.eso.org/rh/requests/{}".format(eso.USERNAME)
     print("Retrieving remote paths for request number {}/{}: {}".format(
         i + 1, I, request_number))
 
-    # Login to ESO.
-    eso = ESO()
-    eso.login("andycasey")
-
     # Check if ESO is ready for us.
     while True:    
+
+        # Login to ESO.
+        eso = ESO()
+        eso.login("andycasey")
 
         check_state = eso._request("GET", "{}/recentRequests".format(url))
         root = BeautifulSoup(check_state.text, "html5lib")
@@ -123,6 +119,11 @@ for i in range(I):
             state, request_number, i + 1, I))
 
         if state != "COMPLETE":
+
+            # Remove anything from the astroquery cache.
+            for cached_file in glob(os.path.join(eso.cache_location, "*")):
+                os.remove(cached_file)
+
             print("Sleeping for {} seconds..".format(WAIT_TIME))
             time.sleep(WAIT_TIME)
 
