@@ -20,13 +20,14 @@ import time
 import yaml
 from astropy.table import Table
 from glob import glob
+from bs4 import BeautifulSoup
 
 from astroquery.eso import Eso as ESO 
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
-SKIP = 0 # Skip how batches at the start?
-BATCH = 10000 # How many datasets should we get per ESO request?
+SKIP = 0 # Skip how many batches at the start? (for if you are re-running this..)
+BATCH = 2500 # How many datasets should we get per ESO request?
 WAIT_TIME = 60 # Seconds between asking ESO if they have prepared our request
 DATA_DIR = "{}/../data/spectra/".format(cwd) # Where's the spectra at?
 
@@ -45,6 +46,7 @@ cursor.execute(
         WHERE NOT EXISTS(
             SELECT 1 FROM obs
             WHERE obs.date_obs = phase3_products.date_obs)
+        ORDER BY phase3_products.ra ASC
     """)
 records = cursor.fetchall()
 cursor.close()
@@ -56,6 +58,7 @@ I = N / BATCH + (1 if N % BATCH else 0)
 assert not os.path.exists(request_numbers_path) and \
        not os.path.exists(remote_paths_path), "This will overwrite old paths!"
 
+remote_paths = []
 request_numbers = []
 
 for i in range(I):
@@ -103,13 +106,10 @@ for i in range(I):
         os.remove(cached_file)
 
 
-# Get the download scripts for our request numbers.
-remote_paths = []
-url = "https://dataportal.eso.org/rh/requests/{}".format(eso.USERNAME)
-N = len(request_numbers)
-for i, request_number in enumerate(request_numbers):
-
-    print("Retrieving remote paths for request number {}/{}".format(i + 1, N))
+    # Get the download scripts for our request number.
+    url = "https://dataportal.eso.org/rh/requests/{}".format(eso.USERNAME)
+    print("Retrieving remote paths for request number {}/{}: {}".format(
+        i + 1, N, request_number))
 
     # Login to ESO.
     eso = ESO()
@@ -117,10 +117,17 @@ for i, request_number in enumerate(request_numbers):
 
     # Check if ESO is ready for us.
     while True:    
-        check_state = eso._request("GET", "{}/{}".format(url, request_number))
+        check_state = eso._request("GET", "{}/{:.0f}".format(url, request_number))
         root = BeautifulSoup(check_state.text, "html5lib")
-
         span = root.find(id="requestState")
+
+        if span is None:
+            print("Redirected to {} -- failed request? -- {} {}".format(
+                check_state.url, request_number, 
+                "LISTED" if str(request_number) in check_state.text else "NOT LISTED"))
+            time.sleep(WAIT_TIME)
+            continue
+
         print("Current state {} on request {} ({}/{})".format(
             span.text, request_number, i + 1, N))
 
@@ -146,6 +153,7 @@ for i, request_number in enumerate(request_numbers):
     # Remove anything from the astroquery cache.
     for cached_file in glob(os.path.join(eso.cache_location, "*")):
         os.remove(cached_file)
+    
 
 # Prepare the script for downloading.
 template_path = os.path.join(cwd, "download_template.sh")
