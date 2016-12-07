@@ -35,7 +35,6 @@ with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 connection = pg.connect(**credentials)
 
-request_numbers_path = os.path.join(cwd, "eso_retrieve_request_numbers.pkl")
 remote_paths_path = os.path.join(cwd, "eso_retrieve_paths.pkl")
 
 # Cross-match tables to find Phase 3 data products that we don't have yet.
@@ -45,7 +44,7 @@ cursor.execute(
         WHERE NOT EXISTS(
             SELECT 1 FROM obs
             WHERE obs.date_obs = phase3_products.date_obs)
-        ORDER BY phase3_products.ra ASC
+        ORDER BY phase3_products.date_obs ASC
     """)
 records = cursor.fetchall()
 cursor.close()
@@ -54,11 +53,11 @@ connection.close()
 N = len(records)
 I = N / BATCH + (1 if N % BATCH else 0)
 
-assert not os.path.exists(request_numbers_path) and \
-       not os.path.exists(remote_paths_path), "This will overwrite old paths!"
+assert not os.path.exists(remote_paths_path), "This will overwrite old paths!"
 
 remote_paths = []
-request_numbers = []
+
+print("In total there are {} records we will request".format(N))
 
 for i in range(I):
 
@@ -94,21 +93,16 @@ for i in range(I):
 
     # Parse the request number so that we can get a download script from ESO later
     _ = re.findall("Request #[0-9]+\w", confirmation_response.text)[0].split()[-1]
-    request_numbers.append(int(_.lstrip("#")))
-
-    # Save the request numbers in case of a catastrophic crash!
-    with open(request_numbers_path, "wb") as fp:
-        pickle.dump(request_numbers, fp, -1)
+    request_number = int(_.lstrip("#"))
 
     # Remove anything from the astroquery cache.
     for cached_file in glob(os.path.join(eso.cache_location, "*")):
         os.remove(cached_file)
 
-
     # Get the download scripts for our request number.
     url = "https://dataportal.eso.org/rh/requests/{}".format(eso.USERNAME)
     print("Retrieving remote paths for request number {}/{}: {}".format(
-        i + 1, N, request_number))
+        i + 1, I, request_number))
 
     # Login to ESO.
     eso = ESO()
@@ -116,21 +110,19 @@ for i in range(I):
 
     # Check if ESO is ready for us.
     while True:    
-        check_state = eso._request("GET", "{}/{:.0f}".format(url, request_number))
-        root = BeautifulSoup(check_state.text, "html5lib")
-        span = root.find(id="requestState")
 
-        if span is None:
-            print("Redirected to {} -- failed request? -- {} {}".format(
-                check_state.url, request_number, 
-                "LISTED" if str(request_number) in check_state.text else "NOT LISTED"))
-            time.sleep(WAIT_TIME)
-            continue
+        check_state = eso._request("GET", "{}/recentRequests".format(url))
+        root = BeautifulSoup(check_state.text, "html5lib")
+
+        link = root.find(href="/rh/requests/{}/{}".format(
+            eso.USERNAME, request_number))
+        image = link.find_next("img")
+        state = image.attrs["alt"]
 
         print("Current state {} on request {} ({}/{})".format(
-            span.text, request_number, i + 1, N))
+            state, request_number, i + 1, I))
 
-        if span.text != "COMPLETE":
+        if state != "COMPLETE":
             print("Sleeping for {} seconds..".format(WAIT_TIME))
             time.sleep(WAIT_TIME)
 
