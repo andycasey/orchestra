@@ -948,7 +948,7 @@ DROP TABLE IF EXISTS stellar_activity;
 CREATE TABLE stellar_activity (
     date_obs text PRIMARY KEY,
     filename text not null,
-    git_hash text not null,
     s_hk numeric,
-    e_s_hk numeric
+    e_s_hk numeric,
+    version integer default -1
 );
