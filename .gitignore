@@ -9,5 +9,6 @@ data/
 scripts/download_spectra.sh
 
 *.pkl
+*.pyc
 
 db/credentials.yaml
