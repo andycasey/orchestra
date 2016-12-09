@@ -19,28 +19,44 @@
 \submitjournal{AAS Journals}
 
 \shorttitle{The Orchestra}
-\shortauthors{Authors}
+\shortauthors{Casey et al.}
 
 \begin{document}
 
+\title{An astrophysically-motivated data-driven model for stellar spectra}
 
-\title{Orchestra: A data-driven model for \harps\ data}
-% Alternatives: melody of harps
-%               twangle of harps (allegedly: https://en.wiktionary.org/wiki/Appendix:Glossary_of_collective_nouns_by_subject)
+\correspondingauthor{Andrew R. Casey}
+\email{arc@ast.cam.ac.uk}
 
-% *ONLY* listed alphabetically
-\author{Megan Bedell}
-\author{Sven Buder}
+
 \author[0000-0003-0174-0564]{Andrew R. Casey}
-\author{Keith Hawkins}
-\author{David W. Hogg}
-\author{Melissa Ness}
-\author{Hans-Walter Rix}
+\affil{Institute of Astronomy, Madingley Road, Cambridge CB3~0HA, England}
+\affil{Monash Centre for Astrophysics, Monash University, Melbourne, 
+	   VIC 3800, Australia}
 
+
+\author{Melissa Ness}
+\affil{Max-Planck-Institut f\"ur Astronomie, Heidelberg}
+
+
+\author{David W. Hogg}
+\affil{Center for Cosmology and Particle Physics, Department of Physics, 
+	   New York University}
+\affil{Center for Data Science, New York University}
+\affil{Flatiron Institute, New York City}
+\affil{Max-Planck-Institut f\"ur Astronomie, Heidelberg}
+
+ 
+% Potential co-authors (contingent on significant contribution to this
+% particular paper):
+%\author{Megan Bedell}
+%\author{Sven Buder}
+%\author{Keith Hawkins}
+%\author{Hans-Walter Rix}
 
 
 \begin{abstract}
-Or should it be a String Quartet?
+Abstract.
 \end{abstract}
 
 \keywords{}
@@ -50,21 +66,121 @@ Or should it be a String Quartet?
 Write.
 
 
-\section{Data}
-\label{sec:observations}
-
-
 \section{Model}
 \label{sec:model}
 
 
+\begin{figure}
+	\plotone{simple_solar_isochrone.pdf}
+	\caption{
+		Effective temperature $\teff$ and surface gravities $\logg$ from
+		Solar metallicity \project{Dartmouth} isochrones \citep{dartmouth}
+		with ages ${1, 2.5, 5, 7.5, 10, 12}$~Gyr. Effective temperatures
+		and surface gravities at points along the isochrone were adopted
+		to synthesize spectra.\label{fig:simple_solar_isochrone}}
+\end{figure}
 
-\section{Discussion}
-\label{sec:discussion}
+
+\begin{figure}
+	\plotone{figures/simple_model/simple_photospheric_properties.pdf}
+	\caption{
+		Rosseland mean opacity $\kappa$ (top) and plasma temperature $T$ 
+		(bottom) shown as a function of optical depth $\tau$ at 500~nm
+		for Solar-abundance model photospheres with stellar parameters
+		at the isochrone points shown in Figure \ref{fig:simple_solar_isochrone}.
+		\label{fig:simple_photospheric_properties}}
+\end{figure}
+
+
+\begin{figure}
+	\plotone{figures/simple_model/simple_regularization_performance.pdf}
+	\caption{
+		The root mean square deviation between a generalized linear model
+		and the integrated equivalent width from spectral synthesis,
+		shown as a function of increasing regularization strength $\Lambda$.
+		We adopted $\Lambda = XX$ by $k$-fold ($k=20$) cross-validation.
+		\label{fig:simple_regularization_performance}}
+\end{figure}
+
+
+\begin{figure}
+	\plotone{figures/simple_model/simple_photospheric_coefficients.pdf}
+	\caption{
+		% TODO: Consistent with nomenclature?
+		Optimized contribution function coefficients $\mathcal{C}$ as a 
+		function of mean optical depth $\tau$ across all Solar metallicity 
+		photospheres shown in Figure \ref{fig:simple_photospheric_properties}.
+		Regularization has forced coefficients deep in the photosphere to
+		zero, indicating that the atomic transition does not contribute net
+		emission or absorption to the emergent spectrum.
+		Positive coefficients indicate net emission and negative coefficients
+		indicate net absorption.
+		\label{fig:simple_photospheric_coefficients}}
+\end{figure}
+
+
+\begin{figure}
+	\plotone{figures/simple_model/simple_photospheric_contributions.pdf}
+	\caption{
+		Contribution functions $\mathcal{C}\kappa/T$ as a function of mean
+		optical depth $\tau$ across all Solar metallicity photospheres.
+		Although there are non-zero contribution coefficients $\mathcal{C}$
+		deep in the photosphere ($\log_{10}\tau < XX$; see Figure
+		\ref{fig:simple_photospheric_coefficients}), this figure shows
+		there is no significant contribution to the emergent spectrum from
+		these deep layers.
+		\label{fig:simple_photospheric_contributions}}
+\end{figure}
+
+			
+
+\begin{figure}
+	\plotone{figures/multi_model/multi_photospheric_coefficients.pdf}
+	\caption{
+		Contribution function coefficients $\mathcal{C}$ for models
+		of different metallicities. These were modelled as a sum of two
+		Gaussians (one emission, one absorption). The positions and
+		strengths of these Gaussians can be seen as a function of [Fe/H].
+		\label{fig:multi_photospheric_coefficients}}
+\end{figure}
+
+
+\begin{figure}
+	\plotone{figures/multi_model/multi_predicted_ew.pdf}
+	\caption{
+		Predicted line strength (equivalent width) for the models
+		shown in Figure \ref{fig:multi_photospheric_coefficients}.
+		Points are coloured by their metallicity.
+		The typical mean and root mean squared deviation is shown.
+		Here we can see that the adopted model form can predict,
+		for a single metallicity, the expected line strength
+		across a star's entire lifetime.
+		\label{fig:multi_predicted_ew}}
+\end{figure}
+
+
+\begin{figure}
+	\plotone{figures/multi_model/multi_model_coefficients.pdf}
+	\caption{
+		Optimized model coefficients across many single-metallicity
+		models.
+		The behaviour of each coefficient is shown with respect to
+		metallicity. This motivates the model form for our
+		hierarchical model.
+		\label{fig:multi_model_coefficients}}
+\end{figure}
 
 
 \acknowledgments
-% Gaia
+
+This project was developed in part at the 2016 NYC \gaia\ Sprint, hosted by the Center for Computational Astrophysics at the Simons Foundation in New York City.
+
+This work has made use of data from the European Space Agency (ESA) mission \gaia\ (http://www.cosmos.esa.int/gaia), processed by the \gaia\ Data Processing and Analysis Consortium (DPAC, http://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the \gaia\ Multilateral Agreement.
+
+% HARPS?
+
+A.~R.~C. was supported in part by the European Union FP7 programme through ERC grant number 320360
+
 
 
 \software{astropy \citep{Robitaille:2013}} 
@@ -75,5 +191,6 @@ Write.
 \bibitem[Astropy Collaboration et al.(2013)]{Robitaille:2013} Astropy Collaboration, Robitaille, T.~P., Tollerud, E.~J., et al.\ 2013, \aap, 558, A33 
 
 \end{thebibliography}
+
 
 \end{document}

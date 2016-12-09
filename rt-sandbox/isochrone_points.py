@@ -1,6 +1,6 @@
 
 import numpy as np
-from scipy import integrate
+from scipy import integrate, interpolate
 from astropy.table import Table
 from isochrones.dartmouth import Dartmouth_Isochrone
 
@@ -75,13 +75,149 @@ for i, (teff, logg, feh) in enumerate(stellar_parameters):
 
 
 # Assemble all possible predictors.
+
 t = Table(stellar_parameters, names=("teff", "logg", "feh"))
+"""
 for i in range(5):
+    # ALL in: 1.75
+    # 1.95
+    # 2.35
+
     for j in range(72):
-        if i in (2, 3):
-            t["p_{}_{}".format(i, j)] = np.log10(photospheric_properties[:, i, j])
+        if i in (2, ):
+            t["p_{}_{}".format(i, j)] = np.log(photospheric_properties[:, i, j])
         else:
             t["p_{}_{}".format(i, j)] = photospheric_properties[:, i, j]
+"""
+
+# THIS WORKS (as the only photospheric predictor) but dunno why:
+for j in range(72):
+    t["c_{}".format(j)] = \
+        (photospheric_properties[:, 4, j]/photospheric_properties[:, 1, j])
+
+
+
+#for j in range(72):
+#    t["c_{}".format(j)] = \
+#        1.0/(photospheric_properties[:, 1, j])
+
+#for j in range(72):
+#    t["d_{}".format(j)] = \
+#        (photospheric_properties[:, 2, j]/photospheric_properties[:, 3, j])
+
+
+# 4 / log(3) --> good; 2.55 rms
+# 4 / log(2) --> good; 3.5 rms
+# 4 / log(1) --> good: 2.50 rms
+# 4 / log(0) --> bad: 5.9 rms
+# 4 / 0 --> bad: 5.7
+# 4 / 1 --> good: 2.53 rms
+# 4 / 2 --> bad: 10 rms
+# 4 / 3 --> OK 6.5 rms.
+
+# 3 / 0 --> bad: 7.45 rms
+# 3 / 1 --> ok: 3.51 rms
+# 3 / 2 --> bad 8.5 rms
+# log(3) / 2 --> bad: 22 ms
+# log(3) / 1 --> bad:
+# log(3) / 0 --> OK, very smooth coefficients,.....!
+# log(2) / 0 --> OK, very smooth coeffs
+# 2 / log(0) --> bad, but zeroy and peaky
+# log(4) / 0: bad
+
+# 0 / 1
+"""
+for i in range(5):
+    for j in range(5):
+        if i == j: continue
+        for k in range(72):
+
+            v = photospheric_properties[:, i, k]/photospheric_properties[:, j, k]
+            t["c_{}_{}_{}".format(i, j, k)] = v
+                
+
+            #t["d_{}_{}_{}".format(i, j, k)] = \
+            #    photospheric_properties[:, j, k]/photospheric_properties[:, i, k]
+
+"""
+
+"""
+for j in range(72):
+    t["d_{}".format(j)] = \
+        np.log(photospheric_properties[:, 3, j]/photospheric_properties[:, 1, j])
+
+
+
+for j in range(72):
+    # Kappa not absou
+    t["b_{}".format(j)] = np.log(
+            photospheric_properties[:, 1, j]**(-5.0/2) \
+            / photospheric_properties[:, 3, j] \
+            * np.exp(0.75 / (8.6173303e-5 * photospheric_properties[:, 1, j])))
+"""
+
+"""
+
+#for j in range(72):
+#    t["c_{}".format(j)] = photospheric_properties[:, 0, j]
+
+
+for j in range(72):
+    t["c_{}".format(j)] = \
+        (photospheric_properties[:, 3, j] * photospheric_properties[:, 1, j]) \
+        / (photospheric_properties[:, 2, j] * photospheric_properties[:, 4, j])
+
+"""
+
+
+"""
+# Put the predictions onto common rho sampling.
+min_common_tau = np.nanmax(photospheric_properties[:, 0, 0])
+max_common_tau = np.nanmin(photospheric_properties[:, 0, -1])
+
+common_tau = np.linspace(min_common_tau, max_common_tau, 72)
+
+pp = {}
+for i in range(photospheric_properties.shape[0]):
+
+    x = photospheric_properties[i, 0, :]
+
+    if not np.isfinite(x).all():
+        for j in range(1, 5):
+            for k in range(common_tau.size):
+                label = "p_{}_{}".format(j, k)
+
+                pp.setdefault(label, [])
+                pp[label].append(np.nan)
+
+    else:
+
+
+        for j in range(1, 5):
+
+            if j in (2, 3):
+                y = np.log10(photospheric_properties[i, j, :])
+            else:
+                y = photospheric_properties[i, j, :]
+
+            tck = interpolate.splrep(x, y)
+            new_y = interpolate.splev(common_tau, tck, ext=3)
+
+            for k in range(common_tau.size):
+
+                label = "p_{}_{}".format(j, k)
+
+                pp.setdefault(label, [])
+                pp[label].append(new_y[k])
+
+
+for k, v in pp.items():
+    t[k] = v
+
+"""
+
+            
+
 
 del t["teff"]
 
@@ -102,14 +238,12 @@ del t["teff"]
 
 
 X = np.array([t[k] for k in t.dtype.names]).T
-y = ew * 1000
+y = (ew * 1000)
 
 
 keep = (np.sum(np.isfinite(X), axis=1) > 2) * np.isfinite(y) \
      * (stellar_parameters[:, 0] > 4000) \
-     * (stellar_parameters[:, 0] < 6500) \
-     * (y < 100)
-
+     * (stellar_parameters[:, 0] < 6500)
 
 # only giants 
 #keep *= (t["logg"] <= 3.5)
@@ -126,7 +260,7 @@ for i in range(X.shape[1]):
 
 from sklearn import linear_model
 
-model = linear_model.LassoCV(cv=20, alphas=10**np.linspace(-3, 3, 10), eps=1e-6)
+model = linear_model.LassoCV(cv=20, eps=1e-6)
 model.fit(X, y)
 
 fig, ax = plt.subplots()
@@ -141,4 +275,92 @@ y2 = model.predict(X)
 ax.scatter(y, y2, c=X[:, 1], edgecolor="none", alpha=0.5)
 
 print(np.mean(y2 - y), np.std(y2 - y))
+
+raise a
+
+c_score = {}
+d_score = {}
+e_score = {}
+
+for i in range(0, 5):
+    for j in range(i, 5):
+        if i == j: continue
+        idx = t.dtype.names.index("c_{}_{}_0".format(i, j))
+        c_score[(i, j)] = np.sum(np.abs(model.coef_[idx:idx+72]))
+        d_score[(i, j)] = np.sum(np.abs(np.diff(model.coef_[idx:idx+72])))
+
+        e_score[(i, j)] = d_score[(i, j)]/c_score[(i, j)]
+
+print("C score")
+print(c_score.keys()[np.argmax(c_score.values())])
+print("D score")
+print(d_score.keys()[np.argmin(d_score.values())])
+
+
+print("E score")
+print(e_score.keys()[np.argmin(e_score.values())])
+
+
+
+fig, ax = plt.subplots()
+x = np.arange(72)
+y = [model.coef_[t.dtype.names.index("c_0_1_{}".format(j))] for j in range(72)]
+y2 = [model.coef_[t.dtype.names.index("c_3_4_{}".format(j))] for j in range(72)]
+
+ax.plot(x, y, label="d_min")
+ax.plot(x, y2, label="d_max")
+plt.legend()
+
+
+
+
+
+raise a
+
+fig, ax = plt.subplots()
+for i in range(5):
+
+    try:
+        index = t.dtype.names.index("p_{}_0".format(i))
+    except:
+        print("Skipping", i)
+        continue
+
+    x = np.arange(72)
+    y = [model.coef_[t.dtype.names.index("p_{}_{}".format(i, j))] \
+        for j in range(x.size)]
+
+    ax.plot(x, y, label=str(i))
+
+ax.set_title("P INDEX")
+plt.legend()
+
+
+
+fig, ax = plt.subplots()
+x = np.arange(72)
+y = [model.coef_[t.dtype.names.index("c_{}".format(j))] for j in range(72)]
+ax.plot(x, y)
+ax.set_title("c")
+
+
+
+
+fig, ax = plt.subplots()
+x = np.arange(72)
+y = [model.coef_[t.dtype.names.index("b_{}".format(j))] for j in range(72)]
+ax.plot(x, y)
+ax.set_title("b")
+
+raise a
+
+fig, ax = plt.subplots()
+x = np.arange(72)
+y = [model.coef_[t.dtype.names.index("d_{}".format(j))] for j in range(72)]
+ax.plot(x, y)
+ax.set_title("d")
+
+
+
+
 
