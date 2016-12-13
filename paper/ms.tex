@@ -8,9 +8,14 @@
 % Define commands
 \newcommand{\acronym}[1]{{\small{#1}}}
 \newcommand{\project}[1]{\textsl{#1}}
+\newcommand{\tc}{\project{The Cannon}}
+\newcommand{\thecannon}{\tc}
 
 \newcommand{\gaia}{\project{Gaia}}
 \newcommand{\harps}{\acronym{HARPS}}
+
+\newcommand{\teff}{T_{\rm eff}}
+\newcommand{\logg}{\log{g}}
 
 \received{}
 \revised{}
@@ -19,7 +24,7 @@
 \submitjournal{AAS Journals}
 
 \shorttitle{The Orchestra}
-\shortauthors{Casey et al.}
+\shortauthors{Casey, Hogg \& Ness}
 
 \begin{document}
 
@@ -46,6 +51,9 @@
 \affil{Flatiron Institute, New York City}
 \affil{Max-Planck-Institut f\"ur Astronomie, Heidelberg}
 
+
+
+\author{others?}
  
 % Potential co-authors (contingent on significant contribution to this
 % particular paper):
@@ -56,22 +64,78 @@
 
 
 \begin{abstract}
-Abstract.
+We have shown that a quadratic data-driven model can predict stellar labels
+more precisely than most physics-driven approaches.  This fact implies that 
+a single quadratic function can accurately approximate the solutions to the 
+coupled time-dependent magnetohydrodynamic and radiative equations, as well
+as the level populations for every species in the photosphere.  Current 
+applications of \thecannon\ treat all pixels independently, requiring up to
+hundreds of coefficients per pixel to predict detailed chemical abundances.
+Without priors on those coefficients and/or strong regularization, the model
+interpretability can decrease as a consequence of the increased flexibility.
+Stellar labels of peculiar stars may not be accurately predicted as a result,
+making the model efficacy weakly dependent on both the training set and the 
+chosen model form.  Here we derive a hierarchical linear model to approximate
+spectral synthesis, based on state-of-the-art stellar photospheric models, 
+line transition data, and modern spectral synthesis routines.  Our model 
+predicts the contribution function for line transitions throughout a stellar 
+photosphere, making it geometry invariant (1D or 3D), and capable of modelling
+absorption or emission with or without the assumption of local thermodynamic
+equilibrium.  We simultaneously infer stellar labels and model coefficients 
+directly from data, thereby \emph{eliminating the requirement for a training 
+set}.
+We apply our model to \texttt{SOME\_DATA} and
+\texttt{DO\_SOMETHING}.
+We release software to approximate spectral syntheses at the 1\% level --- 
+where systematics already dominate --- about $10^7$ times faster than modern
+spectral synthesis programs.
 \end{abstract}
 
 \keywords{}
 
 \section{Introduction} 
 \label{sec:introduction}
-Write.
+
+% Data outgrown methods.
+% Requirements for modern stellar spectroscopy.
+% Tendency for models to become increasingly complex, hoping that will solve the common significant discpreancies noted between different choices of methods.
+% (e.g., hoping that 3D models will save everyone because they don't require free parameters, which presumably is what is driving differences between spectroscopists)
+
+% Data-driven models have shown that expensive spectral synthesis can be approximated by a simple linear or quadratic model.
+% Not only does this approximation provide a 10^6 speed increase, it PERFORMS better.
+
+% As one grows the parameters, the flexibility increases. Regularization showed that these models could be interpretable.
+% However in some parts of parameter space, it would appear a single quadratic model is insufficient to explain everything.
+
+% Worry about the training set.
+% Most of these worries are reasonable, but people worry *too* much about this.
+% Here we remove the requirement of a training set.
+
 
 
 \section{Model}
 \label{sec:model}
 
 
+Here we will construct a linear model for the total relative absorption due to 
+energy transition in a plasma. 
+
+% Introduce E
+
+
+absorption lines in stellar spectra.
+The form of the model will be astrophysically-motivated, and the model coefficients
+will be inferred from data. 
+
+
+% Assumptions.
+
+
+
+
+
 \begin{figure}
-	\plotone{simple_solar_isochrone.pdf}
+	\plotone{figures/simple_model/simple_solar_isochrone.pdf}
 	\caption{
 		Effective temperature $\teff$ and surface gravities $\logg$ from
 		Solar metallicity \project{Dartmouth} isochrones \citep{dartmouth}
@@ -171,20 +235,29 @@ Write.
 \end{figure}
 
 
+\section{Application to \harps\ spectra}
+\label{sec:harps}
+
+
+
+
+
 \acknowledgments
 
 This project was developed in part at the 2016 NYC \gaia\ Sprint, hosted by the Center for Computational Astrophysics at the Simons Foundation in New York City.
 
-This work has made use of data from the European Space Agency (ESA) mission \gaia\ (http://www.cosmos.esa.int/gaia), processed by the \gaia\ Data Processing and Analysis Consortium (DPAC, http://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the \gaia\ Multilateral Agreement.
+This work has made use of data from the European Space Agency (ESA) mission \gaia\ 
+(http://www.cosmos.esa.int/gaia), processed by the \gaia\ Data Processing and Analysis 
+Consortium (DPAC, http://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the
+DPAC has been provided by national institutions, in particular the institutions 
+participating in the \gaia\ Multilateral Agreement.
+A.~R.~C. was supported in part by the European Union FP7 programme through ERC grant number 320360.
+Based on observations made with ESO Telescopes at the La Silla Paranal Observatory under programme ID numbers XXXXXXXXXXXXXXXXX.
 
-% HARPS?
-
-A.~R.~C. was supported in part by the European Union FP7 programme through ERC grant number 320360
 
 
 
-\software{astropy \citep{Robitaille:2013}} 
-% numpy, scipy
+\software{astropy \citep{Robitaille:2013}, numpy, scipy, scikit-learn} 
 
 \begin{thebibliography}{}
 
