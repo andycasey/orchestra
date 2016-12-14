@@ -16,24 +16,37 @@ from smh.photospheres import interpolator as PhotosphereInterpolator
 
 isochrones = {
     0.25: "dartmouth-p0.25-isochrone.iso",
-    0.00: "dartmouth-solar-isochrone.iso",
     -0.25: "dartmouth-m0.25-isochrone.iso",
+    -0.50: "dartmouth-m0.5-isochrone.iso",
+    -0.75: "dartmouth-m0.75-isochrone.iso",
+    -1.25: "dartmouth-m1.25-isochrone.iso",
+    -1.75: "dartmouth-m1.75-isochrone.iso",
+    -2.25: "dartmouth-m2.25-isochrone.iso",
+    -1.00: "dartmouth-m1-isochrone.iso",
+    -1.50: "dartmouth-m1.5-isochrone.iso",
+    -2.00: "dartmouth-m2-isochrone.iso",
+
+}
+
+
+isochrones = {
+    0.00: "dartmouth-solar-isochrone.iso",
+    #-0.25: "dartmouth-m0.25-isochrone.iso",
     #-0.50: "dartmouth-m0.5-isochrone.iso",
     #-0.75: "dartmouth-m0.75-isochrone.iso",
     #-1.00: "dartmouth-m1-isochrone.iso",
-    #-1.25: "dartmouth-m1.25-isochrone.iso",
-    #-1.50: "dartmouth-m1.5-isochrone.iso",
-    #-1.75: "dartmouth-m1.75-isochrone.iso",
     #-2.00: "dartmouth-m2-isochrone.iso",
-    #-2.25: "dartmouth-m2.25-isochrone.iso",
+
 }
+
 
 taus = {}
 phis = {}
+models = {}
 
-colors = cm.get_cmap('terrain', len(isochrones))
+for feh in sorted(isochrones.keys()):
 
-for feh, filename in isochrones.items():
+    filename = isochrones[feh]
 
     iso_logTeff, iso_logg = np.loadtxt(filename, usecols=(2, 3), unpack=True)
     iso_teff = 10**iso_logTeff
@@ -49,13 +62,6 @@ for feh, filename in isochrones.items():
     fehs = fehs[fgk]
 
     stellar_parameters = np.vstack([teff, logg, fehs]).T
-
-    fig, ax = plt.subplots()
-    ax.scatter(stellar_parameters[:, 0], stellar_parameters[:, 1],
-        c=stellar_parameters[:, 2], edgecolor="none", alpha=0.5)
-
-    ax.set_xlim(ax.get_xlim()[::-1])
-    ax.set_ylim(ax.get_ylim()[::-1])
 
 
     # Get ready to start synthesising.
@@ -87,7 +93,9 @@ for feh, filename in isochrones.items():
 
 
     # Assemble all possible predictors.
-    skip_photospheric_names = ["T", "P", "XNE", "ABROSS"]# "XNE", "ABROSS"]
+    skip_photospheric_names = []
+    #"T", "P", "XNE", "ABROSS"]# "XNE", "ABROSS"]
+    logarithmic_columns = ["P", "XNE"]
 
     #solar = stellar_parameters[:, 2] == 0
     #stellar_parameters = stellar_parameters[solar]
@@ -101,7 +109,7 @@ for feh, filename in isochrones.items():
 
         for k in range(K):
             column_name = "{}_{}".format(name, k)
-            t[column_name] = common_photospheric_properties[:, j, k]
+            t[column_name] = photospheric_properties[:, j, k]
 
             if name in logarithmic_columns:
                 t[column_name] = np.log10(t[column_name])
@@ -109,7 +117,7 @@ for feh, filename in isochrones.items():
 
     for k in range(K):
         column_name = "KAPPA_TEFF_{}".format(k)
-        t[column_name] = (photospheric_properties[:, 4, k] \
+        t[column_name] = t["logg"] * (photospheric_properties[:, 4, k] \
                             /  photospheric_properties[:, 1, k])
 
                        #* np.log(photospheric_properties[:, 0, k])
@@ -124,7 +132,6 @@ for feh, filename in isochrones.items():
     Y = ew.copy()
 
 
-
     # Make things isotropic?
     for i in range(X.shape[1]):
         if i == 1: continue
@@ -137,8 +144,8 @@ for feh, filename in isochrones.items():
     assert np.all(np.isfinite(X)) \
        and np.all(np.isfinite(Y)), "X and Y aren't all finite bro"
 
-    '''
-    log10_mean_tau = np.log10(np.mean(photospheric_properties[:, 0, :], axis=0))
+
+    log10_mean_tau = np.mean(np.log10(photospheric_properties[:, 2, :]), axis=0)
 
 
     def predict_EW(theta, x):
@@ -146,6 +153,11 @@ for feh, filename in isochrones.items():
         #mu_0, A_0, sigma_0 = theta[:3]
         #mu_1, A_1, sigma_1 = theta[3:]
         b, m_logg, mu_0, A_0, sigma_0, mu_1, A_1, sigma_1 = theta
+
+        if not (A_0 > 0) \
+        or not (A_1 > 0):
+            return np.nan * np.ones(X.shape[0])
+
 
         #assert A_0 > 0 and A_1 > 0
 
@@ -155,11 +167,16 @@ for feh, filename in isochrones.items():
         logg = x[:, 0]
         kappa_teff = x[:, 1:]
         
-        # Calculate the \phi coefficients.
-        phi = np.zeros(log10_mean_tau.size, dtype=float) \
-            + A_0 * np.exp(-(log10_mean_tau - mu_0)**2/(2 * sigma_0**2)) \
-            - A_1 * np.exp(-(log10_mean_tau - mu_1)**2/(2 * sigma_1**2))
-        EW = m_logg * logg + np.dot(phi, kappa_teff.T) + b
+        EW = np.ones(X.shape[0])
+        for j in range(X.shape[0]):
+
+            tau = log10_mean_tau
+
+            # Calculate the \phi coefficients.
+            phi = \
+                + A_0 * np.exp(-(tau - mu_0)**2/(2 * sigma_0**2)) \
+                - A_1 * np.exp(-(tau - mu_1)**2/(2 * sigma_1**2))
+            EW[j] = m_logg * logg[j] + np.dot(phi, kappa_teff[i].T) + b
 
         # For some reason the results are *much* better if we use a mean tau for
         # this metallicity, rather than the tau for each star.
@@ -177,9 +194,33 @@ for feh, filename in isochrones.items():
         print(theta, np.sum(residual**2))
         return residual
 
+    model = linear_model.LassoCV(cv=20)
+    model.fit(X, Y)
 
-    x0 = np.array([100.625, -3.0, 1.07, 72, 0.10, 1.27, 67.5, 0.10])
+    
+    # Estimate mu, A, etc from model coeffs.
+    pos_coeff = model.coef_[1:] > 0
 
+    idx0 = np.argmax(model.coef_[1:][pos_coeff])
+    idx1 = np.argmin(model.coef_[1:][~pos_coeff])
+
+    
+    mu_0 = log10_mean_tau[pos_coeff][idx0]
+    A_0 = model.coef_[1:][pos_coeff][idx0]
+    sigma_0 = 0.10
+
+    mu_1 = log10_mean_tau[~pos_coeff][idx1]
+    A_1 = np.abs(model.coef_[1:][~pos_coeff][idx1])
+    sigma_1 = 0.10
+    
+    # Get an intercept and m_logg from the model coefficients
+    x0 = np.array([
+        model.intercept_, model.coef_[0],
+        mu_0, A_0, sigma_0,
+        mu_1, A_1, sigma_1])
+
+
+    #x0 = np.array([100.625, -3.0, 1.07, 72, 0.10, 1.27, 67.5, 0.10])
 
     op_params, cov, meta, mesg, code = op.leastsq(
         objective_function, x0, args=(X, ), 
@@ -190,29 +231,55 @@ for feh, filename in isochrones.items():
     ax.set_title(feh)
 
 
+
+
+    """
     b, m_logg, mu_0, A_0, sigma_0, mu_1, A_1, sigma_1 = op_params
     phi = np.zeros(log10_mean_tau.size, dtype=float) \
         + A_0 * np.exp(-(log10_mean_tau - mu_0)**2/(2 * sigma_0**2)) \
         - A_1 * np.exp(-(log10_mean_tau - mu_1)**2/(2 * sigma_1**2))
+    """
 
-    '''
+    linear_rms = np.std(model.predict(X) - Y)
+    phi_rms = np.std(predict_EW(op_params, X) - Y)
 
-    model = linear_model.LassoCV(cv=20)
-    model.fit(X, Y)
+    raise a
+    
+    fig, ax = plt.subplots()
+    ax.plot(log10_mean_tau, model.coef_[1:], c='r')
+    ax.plot(log10_mean_tau, phi, c='b')
+    ax.set_title(feh)
 
-    phi = model.coef_[1:]
+
+    #assert phi_rms <= linear_rms
+
 
     taus[feh] = log10_mean_tau
     phis[feh] = phi
+    models[feh] = (model, x0, op_params)
+
+    break
+
+
+raise a
+
+
+
+
+
 
 
 
 fig, ax = plt.subplots()
-for i, feh in enumerate(sorted(phis.keys())):
+
+N = len(isochrones)
+colors = cm.get_cmap('Set1', N)
+
+for i, feh in enumerate((-2.0, -1.0, 0.0)):
     x = taus[feh]
     y = phis[feh]
 
-    ax.plot(x, y, lw=2, label=feh)
+    ax.plot(y, c=colors(float(i)/4.0), lw=2, label=feh)
 
 
 
