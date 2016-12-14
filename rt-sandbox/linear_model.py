@@ -83,29 +83,28 @@ T_indices = np.array(
 _theta_name_order = ("intercept", "teff", "logg", "feh",
     "mu_emission_0", "mu_absorption_0", 
     "sigma_0",
-    #"sigma_emission_0", "sigma_absorption_0",
-    "dsigma_emission_dlogg", "dsigma_absorption_dlogg",
-    "dsigma_dlogg",
-    "dmu_emission_dlogg", "dmu_absorption_dlogg",
     "amp_emission_abross_0", "amp_absorption_abross_0",
     "amp_emission_P_0", "amp_absorption_P_0",
     "amp_emission_T_0", "amp_absorption_T_0",
     "amp_emission_Ne_0", "amp_absorption_Ne_0",
     "dmu_emission_dfeh", "dmu_absorption_dfeh",
-    "damp_emission_abross_dfeh", "damp_absorption_abross_dfeh",
-    "damp_emission_P_dfeh", "damp_absorption_P_dfeh",
-    "damp_emission_T_dfeh", "damp_absorption_T_dfeh",
-    "damp_emission_Ne_dfeh", "damp_absorption_Ne_dfeh")
+    "damp_abross_dfeh", 
+    "damp_P_dfeh", 
+    "damp_T_dfeh", 
+    "damp_Ne_dfeh")
 
 # wrap the namedtuple so that we can pass kwargs (e.g. some params that
 # we may not want to use anymore in the model)
-__theta = collections.namedtuple("Theta", _theta_name_order)
-def _theta(**kwargs):
-    return __theta(**{k: v for k, v in kwargs.items() if k in __theta._fields})
+_theta = collections.namedtuple("Theta", _theta_name_order)
+def Theta(**kwargs):
+    # Set the default value to zero.
+    kwds = dict(zip(_theta._fields, [0] * len(_theta._fields)))
+    kwds.update({k: v for k, v in kwargs.items() if k in kwds})
+    return _theta(**kwds)
 
 
 # For packing and unpacking theta.
-_pack_theta = lambda theta: _theta(**dict(zip(_theta_name_order, theta)))
+_pack_theta = lambda theta: Theta(**dict(zip(_theta_name_order, theta)))
 _unpack_theta = lambda theta: [getattr(theta, n) for n in _theta_name_order]
 
 mu_lower_bound, mu_upper_bound = (X[depth_indices].min(), X[depth_indices].max())
@@ -137,14 +136,14 @@ def predict_line_strength_by_two_component_gaussian(theta, debug=False):
     or not np.all(mu_emission >= mu_lower_bound):
         return np.nan * np.ones(L)
 
-    amp_emission_abross = np.clip(T.amp_emission_abross_0 + T.damp_emission_abross_dfeh * feh, -np.inf, np.inf)
-    amp_absorption_abross = np.clip(T.amp_absorption_abross_0 + T.damp_absorption_abross_dfeh * feh, -np.inf, np.inf)
-    amp_emission_P = np.clip(T.amp_emission_P_0 + T.damp_emission_P_dfeh * feh, -np.inf, np.inf)
-    amp_absorption_P = np.clip(T.amp_absorption_P_0 + T.damp_absorption_P_dfeh * feh, -np.inf, np.inf)
-    amp_emission_T = np.clip(T.amp_emission_T_0 + T.damp_emission_T_dfeh * feh, -np.inf, np.inf)
-    amp_absorption_T = np.clip(T.amp_absorption_T_0 + T.damp_absorption_T_dfeh * feh, -np.inf, np.inf)
-    amp_emission_Ne = np.clip(T.amp_emission_Ne_0 + T.damp_emission_Ne_dfeh * feh, -np.inf, np.inf)
-    amp_absorption_Ne = np.clip(T.amp_absorption_Ne_0 + T.damp_absorption_Ne_dfeh * feh, -np.inf, np.inf)
+    amp_emission_abross = T.amp_emission_abross_0 + T.damp_abross_dfeh * feh
+    amp_absorption_abross = T.amp_absorption_abross_0 + T.damp_abross_dfeh * feh
+    amp_emission_P = T.amp_emission_P_0 + T.damp_P_dfeh * feh
+    amp_absorption_P = T.amp_absorption_P_0 + T.damp_P_dfeh * feh
+    amp_emission_T = T.amp_emission_T_0 + T.damp_T_dfeh * feh
+    amp_absorption_T = T.amp_absorption_T_0 + T.damp_T_dfeh * feh
+    amp_emission_Ne = T.amp_emission_Ne_0 + T.damp_Ne_dfeh * feh
+    amp_absorption_Ne = T.amp_absorption_Ne_0 + T.damp_Ne_dfeh * feh
 
     A = np.exp(-(X[depth_indices] - mu_absorption)**2 / 2*sigma_absorption**2)
     E = np.exp(-(X[depth_indices] - mu_emission)**2 / 2*sigma_emission**2)
@@ -152,9 +151,9 @@ def predict_line_strength_by_two_component_gaussian(theta, debug=False):
 
     EW = np.sum(T.intercept + T.teff * teff + T.logg * logg + T.feh * feh \
        + (A * amp_absorption_abross - E * amp_emission_abross) * X[abross_indices] \
-       + (A * amp_absorption_P - E * amp_emission_P) * (X[P_indices]) \
-       + (A * amp_absorption_T - E * amp_emission_T) * X[T_indices] \
-       + (A * amp_absorption_Ne - E * amp_absorption_Ne) * X[Ne_indices], axis=0)
+       + (A * amp_absorption_P      - E * amp_emission_P) * X[P_indices] \
+       + (A * amp_absorption_T      - E * amp_emission_T) * X[T_indices] \
+       + (A * amp_absorption_Ne     - E * amp_emission_Ne) * X[Ne_indices], axis=0)
 
     if debug:
         raise a
@@ -172,61 +171,53 @@ def _objective_function(*args):
 def _scalar_objective_function(*args):
     return np.sum(_objective_function(*args)**2)
 
-x0 = {
-    "intercept": np.mean(Y),
-    "teff": 0,
-    "logg": 0,
-    "feh": 0,
-    "dsigma_dlogg": 0.0,
-    "mu_emission_0": 1.24,
-    "mu_absorption_0": 1.40,
-    "dsigma_emission_dlogg": 0.0,
-    "dsigma_absorption_dlogg": 0.0,
-    "dmu_emission_dlogg": 0.0,
-    "dmu_absorption_dlogg": 0.0,
-    "sigma_0": 0.10,
-    "sigma_absorption_0": 0.10,
-    "sigma_emission_0": 0.10,
-    "amp_emission_abross_0": 1,
-    "amp_absorption_abross_0": 1,
-    "amp_emission_P_0": 1,
-    "amp_absorption_P_0": 1,
-    "amp_emission_T_0": 1,
-    "amp_absorption_T_0": 1,
-    "amp_emission_Ne_0": 1,
-    "amp_absorption_Ne_0": 1,
-    # Derivatives w.r.t. [Fe/H]
-    "dmu_emission_dfeh": 0,
-    "dmu_absorption_dfeh": 0,
-    "damp_emission_abross_dfeh": 0,
-    "damp_absorption_abross_dfeh": 0,
-    "damp_emission_P_dfeh": 0,
-    "damp_absorption_P_dfeh": 0,
-    "damp_emission_T_dfeh": 0,
-    "damp_absorption_T_dfeh": 0,
-    "damp_emission_Ne_dfeh": 0,
-    "damp_absorption_Ne_dfeh": 0,
-}
 
-x0 = _unpack_theta(_theta(**x0))
-_test = predict_line_strength(x0)
+# Generate default guess.
+#x0 = _unpack_theta(Theta())
 
-op_params, code = op.leastsq(_objective_function, x0, maxfev=10000)
+x0 = Theta(
+    intercept=0.90435525499985636,
+    teff=-1.7291774329527776,
+    logg=-3.0017985566745993,
+    feh=0.90837907718301714,
+    mu_emission_0=-0.21540114465215066,
+    mu_absorption_0=1.7855319195467394,
+    sigma_0=0.36948647397335077,
+    amp_emission_abross_0=5.2843184202881091,
+    amp_absorption_abross_0=8.2068079195069714,
+    amp_emission_P_0=-0.86345234225034473,
+    amp_absorption_P_0=1.7111582359456383,
+    amp_emission_T_0=5.5028622141360968,
+    amp_absorption_T_0=6.3990990926583642,
+    amp_emission_Ne_0=-5.7335497024162763,
+    amp_absorption_Ne_0=-4.0237518686772349,
+    dmu_emission_dfeh=-3.349741062543691,
+    dmu_absorption_dfeh=-0.21482157905938476,
+    damp_abross_dfeh=-6.5194332639663415,
+    damp_P_dfeh=-11.671524213850915,
+    damp_T_dfeh=0.083971130115375936,
+    damp_Ne_dfeh=8.2801663997721526)
 
-"""
-RMS: 1.622 over all stars.
+# --> generates:
+#RMS: 1.74
+#Mean/median %: 3.69 2.13
 
-array([  0.92372631,  -1.4497533 ,  -3.6438138 ,   1.14707189,
-        -0.05289758,   1.76539419,   0.42170948,   0.        ,
-         0.        ,   0.        ,   0.        ,   0.        ,
-         4.86947579,   8.60472882,  -0.58509349,   3.70243648,
-         8.44175807,  10.64133347,   1.        ,  -8.30185052,
-        -2.69215888,  -0.37682108,  -5.21376156,  -5.22579201,
-       -10.65701395, -11.61577404,  -2.9963926 ,  -4.37976944,
-         0.        ,   9.87685128])
-"""
+
+
+# 264,580
+
+op_params, code = op.leastsq(_objective_function, x0, maxfev=5000)
+
+xp = _pack_theta(op_params)
+
 
 Y_P = predict_line_strength(op_params)
+
+rms = np.std(Y - Y_P)
+percentage = 100 * np.abs((Y - Y_P)/Y)
+print("RMS: {:.2f}".format(rms))
+print("Mean/median %: {:.2f} {:.2f}".format(np.mean(percentage), np.median(percentage)))
+
 
 for column_name in ("logg", "feh"):
     fig, ax = plt.subplots()
