@@ -15,21 +15,14 @@ from astropy.table import Table
 # Load in the synthesised line strengths and photospheric properties.
 data = Table.read("line-strengths.fits")
 
-THREADS = 6
-
 # Which photospheric parameter should we model the Gaussians on?
 K, DEPTH_PARAMETER = (72, "RHOX")
 
-
-
 # Logarithm-ify certain columns.
-logarithmify_columns = ("RHOX", "P", "XNE")
+logarithmify_columns = ("RHOX", "XNE", "P", )
 for c in logarithmify_columns:
     for k in range(K):
         data["{}_{}".format(c, k)] = np.log10(data["{}_{}".format(c, k)])
-
-# Generate new columns based on existing photospheric columns?
-
 
 # Delete output columns.
 Y = data["_ew"]
@@ -38,11 +31,9 @@ assert not any([col.startswith("_") for col in data.dtype.names])
 
 X = np.array([data[column_name] for column_name in data.dtype.names])
 
-#only_consider = (data["feh"] == -2.0)
-#only_consider = (data["feh"] >= -1) #* (data["feh"] <= 0.0)
-#only_consider = (data["feh"] <= -1)
-#X = X[:, only_consider]
-#Y = Y[only_consider]
+only_consider = np.ones(Y.size, dtype=bool)
+X = X[:, only_consider]
+Y = Y[only_consider]
 
 # Checks on PTP values.
 ptp = np.ptp(X, axis=1)
@@ -82,7 +73,8 @@ T_indices = np.array(
 
 _theta_name_order = ("intercept", "teff", "logg", "feh",
     "mu_emission_0", "mu_absorption_0", 
-    "sigma_0",
+    "sigma_emission_0", "sigma_absorption_0",
+    "dsigma_absorption_dfehdlogg",
     "amp_emission_abross_0", "amp_absorption_abross_0",
     "amp_emission_P_0", "amp_absorption_P_0",
     "amp_emission_T_0", "amp_absorption_T_0",
@@ -110,7 +102,7 @@ _unpack_theta = lambda theta: [getattr(theta, n) for n in _theta_name_order]
 mu_lower_bound, mu_upper_bound = (X[depth_indices].min(), X[depth_indices].max())
 
 # Function to model the data.
-def predict_line_strength_by_two_component_gaussian(theta, debug=False):
+def predict_line_strength_by_two_component_gaussian(theta, full_output=False):
     """
     Predict the strength of a single absorption line.
 
@@ -128,14 +120,13 @@ def predict_line_strength_by_two_component_gaussian(theta, debug=False):
     mu_emission = T.mu_emission_0 + T.dmu_emission_dfeh * feh 
     mu_absorption = T.mu_absorption_0 + T.dmu_absorption_dfeh * feh
 
-    sigma_emission = sigma_absorption = T.sigma_0
-    # NOTE: requiring single sigma for both, and requiring that it doesn't vary
-    #       with [Fe/H]
-
     if not np.all(mu_upper_bound >= mu_emission) \
     or not np.all(mu_emission >= mu_lower_bound):
         return np.nan * np.ones(L)
 
+    sigma_emission = T.sigma_emission_0
+    sigma_absorption = T.sigma_absorption_0 + T.dsigma_absorption_dfehdlogg * 10**feh * logg
+    
     amp_emission_abross = T.amp_emission_abross_0 + T.damp_abross_dfeh * feh
     amp_absorption_abross = T.amp_absorption_abross_0 + T.damp_abross_dfeh * feh
     amp_emission_P = T.amp_emission_P_0 + T.damp_P_dfeh * feh
@@ -148,17 +139,16 @@ def predict_line_strength_by_two_component_gaussian(theta, debug=False):
     A = np.exp(-(X[depth_indices] - mu_absorption)**2 / 2*sigma_absorption**2)
     E = np.exp(-(X[depth_indices] - mu_emission)**2 / 2*sigma_emission**2)
 
-
     EW = np.sum(T.intercept + T.teff * teff + T.logg * logg + T.feh * feh \
        + (A * amp_absorption_abross - E * amp_emission_abross) * X[abross_indices] \
        + (A * amp_absorption_P      - E * amp_emission_P) * X[P_indices] \
        + (A * amp_absorption_T      - E * amp_emission_T) * X[T_indices] \
        + (A * amp_absorption_Ne     - E * amp_emission_Ne) * X[Ne_indices], axis=0)
 
-    if debug:
-        raise a
-    # TODO: Don't allow negative line strengths?
-    return EW
+    # TODO: Don't allow negative EWs?
+
+    return (EW, X[depth_indices], A, E) if full_output else EW
+
 
 
 predict_line_strength = predict_line_strength_by_two_component_gaussian
@@ -172,39 +162,38 @@ def _scalar_objective_function(*args):
     return np.sum(_objective_function(*args)**2)
 
 
-# Generate default guess.
-#x0 = _unpack_theta(Theta())
+# Generate initial value.
+x0 = _unpack_theta(Theta(
+    intercept=0.85972998553986724,
+    teff=0.017460341505266527,
+    logg=-4.7019731537599894,
+    feh=1.0584179693653297,
+    mu_emission_0=1.0709724696264904,
+    mu_absorption_0=1.1900378387312363,
+    sigma_emission_0=0.36229703874314678,
+    sigma_absorption_0=0.34797406221173532,
+    dsigma_absorption_dfehdlogg=0.04201639903294907,
+    amp_emission_abross_0=42.496852825436584,
+    amp_absorption_abross_0=44.210684821888307,
+    amp_emission_P_0=-15.405794047318949,
+    amp_absorption_P_0=-11.752735375086061,
+    amp_emission_T_0=72.575016553477411,
+    amp_absorption_T_0=70.219395057343903,
+    amp_emission_Ne_0=-52.576660952260198,
+    amp_absorption_Ne_0=-48.876583107641153,
+    dmu_emission_dfeh=-1.0838648723081996,
+    dmu_absorption_dfeh=-1.0047589456757466,
+    damp_abross_dfeh=-59.361840396035966,
+    damp_P_dfeh=-61.768499259040382,
+    damp_T_dfeh=-66.199055798272511, 
+    damp_Ne_dfeh=86.585760456771794))
 
-x0 = Theta(
-    intercept=0.90435525499985636,
-    teff=-1.7291774329527776,
-    logg=-3.0017985566745993,
-    feh=0.90837907718301714,
-    mu_emission_0=-0.21540114465215066,
-    mu_absorption_0=1.7855319195467394,
-    sigma_0=0.36948647397335077,
-    amp_emission_abross_0=5.2843184202881091,
-    amp_absorption_abross_0=8.2068079195069714,
-    amp_emission_P_0=-0.86345234225034473,
-    amp_absorption_P_0=1.7111582359456383,
-    amp_emission_T_0=5.5028622141360968,
-    amp_absorption_T_0=6.3990990926583642,
-    amp_emission_Ne_0=-5.7335497024162763,
-    amp_absorption_Ne_0=-4.0237518686772349,
-    dmu_emission_dfeh=-3.349741062543691,
-    dmu_absorption_dfeh=-0.21482157905938476,
-    damp_abross_dfeh=-6.5194332639663415,
-    damp_P_dfeh=-11.671524213850915,
-    damp_T_dfeh=0.083971130115375936,
-    damp_Ne_dfeh=8.2801663997721526)
-
-# --> generates:
-#RMS: 1.74
-#Mean/median %: 3.69 2.13
-
+#RMS: 1.40
+#Mean/median %: 3.54 1.64
 
 
-# 264,580
+if not np.isfinite(_scalar_objective_function(x0)):
+    x0 = _unpack_theta(Theta())
 
 op_params, code = op.leastsq(_objective_function, x0, maxfev=5000)
 
@@ -221,7 +210,7 @@ print("Mean/median %: {:.2f} {:.2f}".format(np.mean(percentage), np.median(perce
 
 for column_name in ("logg", "feh"):
     fig, ax = plt.subplots()
-    scat = ax.scatter(Y, Y_P, c=data[column_name], edgecolor="none")
+    scat = ax.scatter(Y, Y_P, c=data[column_name][only_consider], edgecolor="none")
     cbar = plt.colorbar(scat)
     cbar.set_label(column_name)
 
