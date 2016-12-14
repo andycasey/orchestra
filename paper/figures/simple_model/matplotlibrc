@@ -1,0 +1,36 @@
+
+#font.family: sans-serif
+#font.sans-serif: Helvetica
+#text.usetex : True
+#mathtext.fontset : custom
+#mathtext.default : rm
+
+#text.usetex: True
+#font.size: 14
+#legend.fontsize: 12
+#text.latex.preamble: "\usepackage{cmbright}"
+
+backend: PS
+text.usetex: True
+text.latex.unicode: True
+font.family: xyzxyz
+font.serif: abcabc # Comment this out
+
+
+font.size : 14.0
+axes.formatter.use_mathtext : True
+
+axes.linewidth: 1.5
+axes.labelsize : 14.0
+axes.unicode_minus : False
+
+xtick.major.size : 5
+xtick.minor.size : 3
+xtick.major.width : 2.0
+xtick.minor.width : 1.0
+
+ytick.major.size : 5
+ytick.minor.size : 3
+ytick.major.width : 2.0
+ytick.minor.width : 1.0
+
