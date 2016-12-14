@@ -152,7 +152,7 @@ def predict_line_strength_by_two_component_gaussian(theta, debug=False):
 
     EW = np.sum(T.intercept + T.teff * teff + T.logg * logg + T.feh * feh \
        + (A * amp_absorption_abross - E * amp_emission_abross) * X[abross_indices] \
-       + (A * amp_absorption_P - E * amp_emission_P) * (X[P_indices] * X[T_indices] * X[Ne_indices]) \
+       + (A * amp_absorption_P - E * amp_emission_P) * (X[P_indices]) \
        + (A * amp_absorption_T - E * amp_emission_T) * X[T_indices] \
        + (A * amp_absorption_Ne - E * amp_absorption_Ne) * X[Ne_indices], axis=0)
 
@@ -214,16 +214,16 @@ _test = predict_line_strength(x0)
 op_params, code = op.leastsq(_objective_function, x0, maxfev=10000)
 
 """
-RMS: 2.4735 over all stars.
+RMS: 1.622 over all stars.
 
-array([  0.85923125,  -4.50806829,  -0.09120123,   0.56590817,
-        -2.39319847,   2.21548088,   0.68206865,   0.        ,
+array([  0.92372631,  -1.4497533 ,  -3.6438138 ,   1.14707189,
+        -0.05289758,   1.76539419,   0.42170948,   0.        ,
          0.        ,   0.        ,   0.        ,   0.        ,
-         0.87448033,   4.10775913,  12.14066168,   5.48513061,
-        -1.77023346,   8.95342997,   1.        ,  -3.93395912,
-         0.67539547,   0.68012677,   0.18371188,  -2.24786975,
-         2.47883326,   4.67083319,  -3.07569771,   1.47286931,
-         0.        ,  -4.25641353])
+         4.86947579,   8.60472882,  -0.58509349,   3.70243648,
+         8.44175807,  10.64133347,   1.        ,  -8.30185052,
+        -2.69215888,  -0.37682108,  -5.21376156,  -5.22579201,
+       -10.65701395, -11.61577404,  -2.9963926 ,  -4.37976944,
+         0.        ,   9.87685128])
 """
 
 Y_P = predict_line_strength(op_params)
