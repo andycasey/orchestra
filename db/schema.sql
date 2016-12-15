@@ -764,6 +764,8 @@ CREATE TABLE obs (
     drs_version text,
     drs_ccd_sigdet numeric,
     drs_ccd_conad numeric,
+    drs_cal_th_file text,
+    drs_cal_flat_file text,
     drs_blaze_file text,
     drs_spe_ext_opt integer,
     drs_spe_ext_window integer,
@@ -948,7 +950,7 @@ DROP TABLE IF EXISTS stellar_activity;
 CREATE TABLE stellar_activity (
     date_obs text PRIMARY KEY,
     filename text not null,
+    git_hash text not null,
     s_hk numeric,
-    e_s_hk numeric,
-    version integer default -1
+    e_s_hk numeric
 );
