@@ -16,7 +16,7 @@ from astropy.io import fits
 cwd = os.path.dirname(__file__)
 
 DEBUG = False
-THREADS = 20
+THREADS = 10
 DATA_DIR = os.path.realpath(os.path.join(cwd, "../data/spectra/"))
 
 # Database credentials
@@ -39,11 +39,11 @@ def _ingest_obs_headers(filename):
     :param filename:
         The local path of the reduced FITS file.
     """
-
     connection = pg.connect(**credentials)
     cursor = connection.cursor()
 
     required_keys = ("drs_ccf_rvc", "mjd_obs", "drs_dvrms")
+    print("Ingesting {}".format(filename))
 
     try:
         with fits.open(filename) as image:
@@ -120,10 +120,12 @@ def _ingest_obs_headers(filename):
 #/media/My Book/research/orchestra/data/spectra/data/reduced/2004-10-05/HARPS.2004-10-05T03:16:30.268_bis_G2_A.fits:
 
 
+#print("There are {} files to check (and potentially ingest)".format(N))
+#for filename in obs_filenames:
+#    _ingest_obs_headers(filename)
+
 
 # Ingest the headers from each file.
-print("There are {} files to check (and potentially ingest)".format(N))
-
 pool = mp.Pool(THREADS)
 result = pool.map_async(_ingest_obs_headers, obs_filenames).get()
 pool.close()

@@ -764,6 +764,8 @@ CREATE TABLE obs (
     drs_version text,
     drs_ccd_sigdet numeric,
     drs_ccd_conad numeric,
+    drs_cal_th_file text,
+    drs_cal_flat_file text,
     drs_blaze_file text,
     drs_spe_ext_opt integer,
     drs_spe_ext_window integer,

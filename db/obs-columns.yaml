@@ -73,6 +73,8 @@ ESO DRS BIS RV: drs_bis_rv
 ESO DRS BIS SPAN: drs_bis_span
 ESO DRS BJD: drs_bjd
 ESO DRS BLAZE FILE: drs_blaze_file
+ESO DRS CAL TH FILE: drs_cal_th_file
+ESO DRS CAL FLAT FILE: drs_cal_flat_file
 ESO DRS CCD CONAD: drs_ccd_conad
 ESO DRS CCD SIGDET: drs_ccd_sigdet
 ESO DRS CCF CONTRAST: drs_ccf_contrast
