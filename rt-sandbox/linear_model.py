@@ -31,7 +31,10 @@ assert not any([col.startswith("_") for col in data.dtype.names])
 
 X = np.array([data[column_name] for column_name in data.dtype.names])
 
-only_consider = np.ones(Y.size, dtype=bool)
+#only_consider = np.zeros(Y.size, dtype=bool)
+#only_consider[-191:] = True
+only_consider = np.ones(Y.size, dtype=bool)#
+only_consider = data["feh"] == 0.0
 X = X[:, only_consider]
 Y = Y[only_consider]
 
@@ -48,10 +51,12 @@ depth_indices = np.array(
 P, L = X.shape
 for p in range(P):
     if p in depth_indices: continue
+    if data.dtype.names[p] == "logg": continue
     offset = np.mean(X[p])
     scale = np.ptp(X[p])
     if scale > 0:
         X[p] = (X[p] - offset)/scale
+
 
 assert np.all(np.isfinite(X)) and np.all(np.isfinite(Y)), \
        "Are you sure you know what you're doing?"
@@ -71,6 +76,7 @@ T_indices = np.array(
     [data.dtype.names.index("T_{}".format(i)) for i in range(K)])
 
 
+# For two component gaussian.
 _theta_name_order = ("intercept", "teff", "logg", "feh",
     "mu_emission_0", "mu_absorption_0", 
     "sigma_emission_0", "sigma_absorption_0",
@@ -84,6 +90,14 @@ _theta_name_order = ("intercept", "teff", "logg", "feh",
     "damp_P_dfeh", 
     "damp_T_dfeh", 
     "damp_Ne_dfeh")
+
+# For linear combination
+_theta_name_order = (
+    "giant_intercept", "giant_teff", "giant_logg", "giant_feh",
+    "ms_intercept", "ms_teff", "ms_logg", "ms_feh",
+    "turnoff_logg", "turnoff_scale", "x0", "x1", "x2",
+    "o1", "o2", "o3", "o4", "o5", "o6"
+)
 
 # wrap the namedtuple so that we can pass kwargs (e.g. some params that
 # we may not want to use anymore in the model)
@@ -139,19 +153,46 @@ def predict_line_strength_by_two_component_gaussian(theta, full_output=False):
     A = np.exp(-(X[depth_indices] - mu_absorption)**2 / 2*sigma_absorption**2)
     E = np.exp(-(X[depth_indices] - mu_emission)**2 / 2*sigma_emission**2)
 
-    EW = np.sum(T.intercept + T.teff * teff + T.logg * logg + T.feh * feh \
-       + (A * amp_absorption_abross - E * amp_emission_abross) * X[abross_indices] \
+    contribution = \
+         (A * amp_absorption_abross - E * amp_emission_abross) * X[abross_indices] \
        + (A * amp_absorption_P      - E * amp_emission_P) * X[P_indices] \
        + (A * amp_absorption_T      - E * amp_emission_T) * X[T_indices] \
-       + (A * amp_absorption_Ne     - E * amp_emission_Ne) * X[Ne_indices], axis=0)
+       + (A * amp_absorption_Ne     - E * amp_emission_Ne) * X[Ne_indices]
+
+    EW = np.sum(T.intercept + T.teff * teff + T.logg * logg + T.feh * feh \
+       + contribution, axis=0)
 
     # TODO: Don't allow negative EWs?
-
-    return (EW, X[depth_indices], A, E) if full_output else EW
-
+    return (EW, X[depth_indices], A, E, contribution) if full_output else EW
 
 
-predict_line_strength = predict_line_strength_by_two_component_gaussian
+def predict_line_strength_by_linear_combination(theta, full_output=False):
+
+    T = _pack_theta(theta)
+
+    if not (2 * max(logg) >= T.turnoff_logg >= min(logg)) \
+    or not T.turnoff_scale > 0:
+        return np.nan * np.ones_like(Y)
+
+    giant_regime  = T.giant_intercept \
+        + T.giant_teff * teff \
+        + T.giant_logg * logg \
+        + T.giant_feh * feh
+
+    ms_regime = T.ms_intercept \
+        + T.ms_teff * teff \
+        + T.ms_logg * logg \
+        + T.ms_feh * feh 
+
+    sigmoid = 1.0/(1.0 + np.exp(-T.turnoff_scale * (logg - T.turnoff_logg)))
+    EW = giant_regime * sigmoid + ms_regime * (1.0 - sigmoid)
+    
+    if full_output:
+        raise a
+    return EW
+
+
+predict_line_strength = predict_line_strength_by_linear_combination
 
 def _objective_function(*args):
     residual = predict_line_strength(*args) - Y
@@ -193,14 +234,18 @@ x0 = _unpack_theta(Theta(
 
 
 if not np.isfinite(_scalar_objective_function(x0)):
-    x0 = _unpack_theta(Theta())
+    x0 = _unpack_theta(Theta(turnoff_logg=4.5, turnoff_scale=1.0))
+
+x0 = _unpack_theta(Theta(turnoff_logg=4.5, turnoff_scale=100))
+_test = _objective_function(x0)
 
 op_params, code = op.leastsq(_objective_function, x0, maxfev=5000)
 
 xp = _pack_theta(op_params)
 
+Y_P = predict_line_strength(op_params)#, full_output=True)
 
-Y_P = predict_line_strength(op_params)
+#Y_P, depths, A, E, contribution = predict_line_strength(op_params, full_output=True)
 
 rms = np.std(Y - Y_P)
 percentage = 100 * np.abs((Y - Y_P)/Y)
@@ -208,10 +253,16 @@ print("RMS: {:.2f}".format(rms))
 print("Mean/median %: {:.2f} {:.2f}".format(np.mean(percentage), np.median(percentage)))
 
 
-for column_name in ("logg", "feh"):
+for column_name in ("logg", "feh", "teff"):
     fig, ax = plt.subplots()
     scat = ax.scatter(Y, Y_P, c=data[column_name][only_consider], edgecolor="none")
     cbar = plt.colorbar(scat)
     cbar.set_label(column_name)
 
 
+
+
+
+
+# Plot the sum of the contribution as a function of the stellar parameters.
+# Could we ap
