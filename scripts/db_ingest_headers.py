@@ -14,10 +14,17 @@ import yaml
 from glob import glob
 from astropy.io import fits
 
-cwd = os.path.dirname(__file__)
+# Enable logging.
+logger = logging.getLogger("orchestra")
+logger.setLevel(logging.INFO) 
 
+hdl = logging.StreamHandler()
+hdl.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-8s] %(message)s"))
+logger.addHandler(hdl)
+
+cwd = os.path.dirname(__file__)
 DEBUG = False
-THREADS = 10
+THREADS = 2
 DATA_DIR = os.path.realpath(os.path.join(cwd, "../data/spectra/"))
 
 # Database credentials
@@ -25,7 +32,7 @@ with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 
 # Find the relevant *_bis_G2_A.fits files.
-obs_filenames = glob(os.path.join(DATA_DIR, "data/reduced/*/*_bis_*_A.fits"))
+obs_filenames = glob(os.path.join(DATA_DIR, "data/reduced/*/*_bis_*_A.fits"))[::-1]
 N = len(obs_filenames)
 
 # Get translators for the column/header names.
@@ -113,15 +120,51 @@ def _ingest_obs_headers(filename, connection):
 
 
 def _ingest_many_obs_headers(*filenames):
+    
+    connections = [pg.connect(**credentials)]
 
+    # Chaos-Monkey theorem for database connections.
+    n, N = (0, len(filenames))
+    while N > n:
+        try:
+            _ingest_obs_headers(filenames[n], connections[-1])
 
-    connection = pg.connect(**credentials)
+        except pg.DatabaseError:
+            logger.warning("Lost database connection. Reconnecting..")
 
-    for filename in filenames:
-        _ingest_obs_headers(filename, connection)
+            failed_connection = connections.pop(-1)
+            failed_connection.close()
+            del failed_connection
 
+            # Create a new connection and try again with this filename.
+            connections.append(pg.connect(**credentials))
+
+        else:
+            n += 1
+
+    connection = connections.pop(-1)
     connection.commit()
     connection.close()
+    return None
+
+# Remove things that we have ingested already.
+ingested_filenames = []
+
+connection = pg.connect(**credentials)
+cursor = connection.cursor()
+cursor.execute("SELECT filename FROM obs")
+if cursor.rowcount > 0:
+    ingested_filenames.extend(
+        [os.path.join(DATA_DIR, "data", "reduced", each[0].split("HARPS.")[1].split("T")[0], each[0]) \
+            for each in cursor.fetchall()])
+
+cursor.close()
+connection.close()
+
+obs_filenames = list(set(obs_filenames).difference(ingested_filenames))
+if len(ingested_filenames) > 0:
+    assert len(obs_filenames) < N
+N = len(obs_filenames)
 
 
 # Ingest the headers from each file.

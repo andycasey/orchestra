@@ -38,7 +38,7 @@ with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 
 # Create a function to process all spectra in parallel.
-def _process_stellar_activity(filename, connection):
+def measure_stellar_activity(filename, connection):
     """
     Measure the S_HK index as a proxy of stellar activity from a reduced HARPS
     spectrum, and ingest that measurement into the database.
@@ -106,14 +106,33 @@ def _process_stellar_activity(filename, connection):
     return None
 
 
-def process_stellar_activity_in_parallel(*filenames):
-    connection = pg.connect(**credentials)
-    for filename in filenames:
-        _process_stellar_activity(filename, connection)
+def measure_stellar_activity_wrapper(*filenames):
 
+    connections = [pg.connect(**credentials)]
+
+    # Chaos-Monkey theorem for database connections.
+    n, N = (0, len(filenames))
+    while N > n:
+        try:
+            measure_stellar_activity(filenames[n], connections[-1])
+
+        except pg.DatabaseError:
+            logger.warning("Lost database connection. Reconnecting..")
+
+            failed_connection = connections.pop(-1)
+            failed_connection.close()
+            del failed_connection
+
+            # Create a new connection and try again with this filename.
+            connections.append(pg.connect(**credentials))
+
+        else:
+            n += 1
+
+    connection = connections.pop(-1)
     connection.commit()
     connection.close()
-
+    return None
 
 # Chunk it out.
 pool = mp.Pool(THREADS)
@@ -123,7 +142,7 @@ results = []
 for t in range(THREADS):
     results.append(
         pool.apply_async(
-            process_stellar_activity_in_parallel, filenames[t * s:(t + 1) * s]))
+            measure_stellar_activity_wrapper, filenames[t * s:(t + 1) * s]))
 
 results = [each.get() for each in results]
 pool.join()
