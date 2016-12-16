@@ -1,6 +1,6 @@
 
 """
-Retrieve calibration files from ESO.
+Retrieve nightly calibration files from ESO.
 """
 
 __author__ = "Andrew R. Casey <arc@ast.cam.ac.uk>"
@@ -25,12 +25,12 @@ BATCH = 2000 # How many datasets should we get per ESO request?
 WAIT_TIME = 60 # Seconds between asking ESO if they have prepared our request
 DATA_DIR = "{}/../data/spectra/".format(cwd) # Where's the spectra at?
 
+remote_paths_path = os.path.join(cwd, "eso_retrieve_calibration_paths.pkl")
+
 # Connect to the PostgreSQL database.
 with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 connection = pg.connect(**credentials)
-
-remote_paths_path = os.path.join(cwd, "eso_retrieve_calibration_paths.pkl")
 
 # Find calibration files.
 cursor = connection.cursor()
