@@ -80,9 +80,8 @@ def process_harps_spectra(*filenames):
 pool = mp.Pool(THREADS)
 s = int(np.ceil(float(N)/THREADS))
 
-results  =  [pool.apply_async(
-                process_stellar_activity_in_parallel, filenames[t * s:(t + 1) * s]) \
-            for t in range(THREADS)]      
+results  =  [pool.apply_async(process_harps_spectra, filenames[t * s:(t + 1) * s]) \
+                for t in range(THREADS)]      
 
 results = [result.get() for result in results]
 pool.join()
