@@ -10,144 +10,81 @@ With those assumptions in mind, here is some example code:
 
 
 """
-Ingest header information from HARPS data products.
+A template script for measuring something on all HARPS data, and uploading the
+result to the harps.guru database.
 """
 
-__author__ = "Andrew R. Casey <arc@ast.cam.ac.uk>"
+__author__ = "Andy Casey <arc@ast.cam.ac.uk>"
 
 import os
 import logging
-import multiprocessing as mp
 import numpy as np
+import multiprocessing as mp
 import psycopg2 as pg
 import yaml
-from glob import glob
 from astropy.io import fits
+from glob import glob
 
-cwd = os.path.dirname(__file__)
+# Enable logging.
+logger = logging.getLogger("orchestra")
+logger.setLevel(logging.INFO) 
 
-DEBUG = False
+hdl = logging.StreamHandler()
+hdl.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-8s] %(message)s"))
+logger.addHandler(hdl)
+
+# Set some configuration values.
 THREADS = 10
-DATA_DIR = os.path.realpath(os.path.join(cwd, "../data/spectra/"))
+cwd = os.path.dirname(__file__)
+DATA_DIR = os.path.join(cwd, "../data/spectra/")
+
+# Find all spectra.
+filenames = glob(os.path.join(DATA_DIR, "data/reduced/*/*_s1d_A.fits"))
+N = len(filenames)
+logger.info("There are {} HARPS spectra matching '*_s1d_A.fits'".format(N))
 
 # Database credentials
 with open(os.path.join(cwd, "../db/credentials.yaml"), "r") as fp:
     credentials = yaml.load(fp)
 
-# Find the relevant *_bis_G2_A.fits files.
-obs_filenames = glob(os.path.join(DATA_DIR, "data/reduced/*/*_bis_*_A.fits"))[::-1]
-N = len(obs_filenames)
 
-# Get translators for the column/header names.
-with open(os.path.join(cwd, "../db/obs-columns.yaml"), "r") as fp:
-    columns = yaml.load(fp)
-
-
-def _ingest_obs_headers(filename, connection):
+# Create a function to process a single spectrum.
+def _process_harps_spectrum(filename, connection):
     """
-    Ingest the headers from a reduced HARPS spectrum (*_bis_G2_A.fits product).
-
-    :param filenames:
-        The local path of the reduced FITS files.
+    Measure something from a spectrum.
     """
 
-    
-    required_keys = ("drs_ccf_rvc", "mjd_obs", "drs_dvrms")
+    with fits.open(filename) as image:
+        object_name = image[0].header["OBJECT"]
 
-    print("Ingesting {}".format(filename))
     cursor = connection.cursor()
-
-    try:
-        with fits.open(filename) as image:
-
-            keys = []
-            values = []
-            for header_key, sql_key in columns.items():
-                try:
-                    value = image[0].header.get(header_key, None)
-
-                except fits.VerifyError:
-                    print("Couldn't parse key '{}' from {}".format(
-                        header_key, filename))
-
-                    if sql_key == "date_obs":
-                        # If this is the case, we are just fucked.
-                        continue
-
-                else:
-                    keys.append(sql_key)
-
-                    # Some 2004 data fail because they record NaNs like this:
-                    if value == "NaN." \
-                    or (sql_key in required_keys and value is None):
-                        value = "NaN"
-
-                    values.append(value)
-
-            # Sometimes the DATE-OBS and filename can be a millisecond different
-            # from each other, so we are storing the filename stub here too.
-            keys += ["filename"]
-            values += [os.path.basename(filename)]
-
-            for required_key in required_keys:
-                if required_key not in keys:
-                    keys.append(required_key)
-                    values.append(np.nan)
-                    
-            # Prepare inputs for the request.
-            fillers = ", ".join(["%s"] * len(keys))
-            column_names = ", ".join(keys)
-            
-            try:
-                cursor.execute(
-                    """ INSERT INTO obs ({column_names}) 
-                        VALUES ({fillers})
-                        ON CONFLICT DO NOTHING;
-                    """.format(column_names=column_names, fillers=fillers), 
-                    values)
-
-            except (pg.IntegrityError, pg.DataError):
-                logger.warn("Exception when ingesting {}".format(filename))
-                connection.rollback()
-                
-            else:
-                connection.commit()
-
-    except IOError:
-        logging.exception("IOError while opening {}".format(filename))
-
+    cursor.execute(
+        """ INSERT INTO my_objects (object_name)
+            VALUES (%s)
+            ON CONFLICT DO NOTHING;""",
+        (object_name, ))
     cursor.close()
-
     return None
 
 
-
-def _ingest_many_obs_headers(*filenames):
-
-
+def process_harps_spectra(*filenames):
     connection = pg.connect(**credentials)
-
     for filename in filenames:
-        _ingest_obs_headers(filename, connection)
+        _process_harps_spectrum(filename, connection)
 
     connection.commit()
     connection.close()
 
 
-# Ingest the headers from each file.
-print("Opening {} threads to ingest {} files".format(THREADS, N))
-
 # Chunk it out.
 pool = mp.Pool(THREADS)
 s = int(np.ceil(float(N)/THREADS))
 
-results = []
-for t in range(THREADS):
-    results.append(
-        pool.apply_async(_ingest_many_obs_headers, obs_filenames[t * s:(t + 1) * s]))
+results  =  [pool.apply_async(
+                process_stellar_activity_in_parallel, filenames[t * s:(t + 1) * s]) \
+            for t in range(THREADS)]      
 
-results = [each.get() for each in results]
+results = [result.get() for result in results]
 pool.join()
 pool.close()
-
 ````
