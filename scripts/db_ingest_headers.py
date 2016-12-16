@@ -10,6 +10,7 @@ import logging
 import multiprocessing as mp
 import numpy as np
 import psycopg2 as pg
+import time
 import yaml
 from glob import glob
 from astropy.io import fits
@@ -24,7 +25,7 @@ logger.addHandler(hdl)
 
 cwd = os.path.dirname(__file__)
 DEBUG = False
-THREADS = 2
+THREADS = 4
 DATA_DIR = os.path.realpath(os.path.join(cwd, "../data/spectra/"))
 
 # Database credentials
@@ -130,11 +131,14 @@ def _ingest_many_obs_headers(*filenames):
             _ingest_obs_headers(filenames[n], connections[-1])
 
         except pg.DatabaseError:
-            logger.warning("Lost database connection. Reconnecting..")
+            logger.warning(
+                "Lost database connection. Reconnecting in ~5 seconds..")
 
             failed_connection = connections.pop(-1)
             failed_connection.close()
             del failed_connection
+
+            time.sleep(np.random.randint(5, 10))
 
             # Create a new connection and try again with this filename.
             connections.append(pg.connect(**credentials))
@@ -180,6 +184,6 @@ for t in range(THREADS):
         pool.apply_async(_ingest_many_obs_headers, obs_filenames[t * s:(t + 1) * s]))
 
 results = [each.get() for each in results]
-pool.join()
 pool.close()
+pool.join()
 

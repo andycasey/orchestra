@@ -8,6 +8,7 @@ import logging
 import numpy as np
 import multiprocessing as mp
 import psycopg2 as pg
+import time
 import yaml
 from astropy.io import fits
 from glob import glob
@@ -117,11 +118,14 @@ def measure_stellar_activity_wrapper(*filenames):
             measure_stellar_activity(filenames[n], connections[-1])
 
         except pg.DatabaseError:
-            logger.warning("Lost database connection. Reconnecting..")
+            logger.warning(
+                "Lost database connection. Reconnecting in ~5 seconds..")
 
             failed_connection = connections.pop(-1)
             failed_connection.close()
             del failed_connection
+
+            time.sleep(np.random.randint(5, 10))
 
             # Create a new connection and try again with this filename.
             connections.append(pg.connect(**credentials))
@@ -145,6 +149,6 @@ for t in range(THREADS):
             measure_stellar_activity_wrapper, filenames[t * s:(t + 1) * s]))
 
 results = [each.get() for each in results]
-pool.join()
-pool.close()
 
+pool.close()
+pool.join()
