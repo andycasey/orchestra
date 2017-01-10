@@ -52,6 +52,8 @@ def shk_index(wave, flux, rv):
 
     wave = wave/(1. + rv/299792.458)  # shift to star's rest frame
     ind = (wave > 3850.0) & (wave < 4050.0)
+    # Exclude negative or non-finite fluxes in our windowed region
+    ind[ind] *= (flux[ind] > 0) & np.isfinite(flux[ind])
     wave = wave[ind]
     flux = flux[ind]
     

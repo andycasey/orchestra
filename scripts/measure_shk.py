@@ -13,7 +13,7 @@ import yaml
 from astropy.io import fits
 from glob import glob
 
-from orchestra.stellar_activity import shk_index as measure_stellar_activity
+from orchestra.stellar_activity import shk_index
 
 # Enable logging.
 logger = logging.getLogger("orchestra")
@@ -26,7 +26,7 @@ logger.addHandler(hdl)
 # Set some configuration values.
 cwd = os.path.dirname(__file__)
 OVERWRITE = True
-THREADS = 10
+THREADS = 4
 DATA_DIR = os.path.join(cwd, "../data/spectra/")
 
 # Find all spectra.
@@ -82,7 +82,7 @@ def measure_stellar_activity(filename, connection):
             "RV for date_obs = '{}' (filename: {}) is not finite"\
             .format(date_obs, basename))       
     else:
-        s_hk, e_s_hk = measure_stellar_activity(wavelength, flux, rv)
+        s_hk, e_s_hk = shk_index(wavelength, flux, rv)
 
         logger.info(
             "Measured S_HK = {:.2f} ({:.2e}) in '{}' from {} (date_obs = {})"\
@@ -137,6 +137,27 @@ def measure_stellar_activity_wrapper(*filenames):
     connection.commit()
     connection.close()
     return None
+
+
+# Remove things that we have ingested already.
+measured_filenames = []
+
+connection = pg.connect(**credentials)
+cursor = connection.cursor()
+cursor.execute("SELECT filename FROM obs")
+if cursor.rowcount > 0:
+    measured_filenames.extend(
+        [os.path.join(DATA_DIR, "data", "reduced", each[0].split("HARPS.")[1].split("T")[0], each[0]).split("_bis_")[0] + "_s1d_A.fits" \
+            for each in cursor.fetchall()])
+
+cursor.close()
+connection.close()
+
+filenames = list(set(filenames).difference(measured_filenames))
+if len(measured_filenames) > 0:
+    assert len(filenames) < N
+N = len(filenames)
+
 
 # Chunk it out.
 pool = mp.Pool(THREADS)
