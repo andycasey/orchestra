@@ -5,10 +5,12 @@ paper/ms.log
 paper/ms.aux
 
 data/
+*.fits
+*.tar
 
 scripts/download_spectra.sh
 
 *.pkl
 *.pyc
 
-db/credentials.yaml
+credentials.yaml

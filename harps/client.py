@@ -1,13 +1,18 @@
 
 import re
 import asyncio # so you know we are serious
+import os
 import requests
+import tarfile
 import tempfile
 import yaml
+from requests.auth import HTTPBasicAuth
 
+from astropy.io import fits
 from astropy.table import Table
 from astropy.extern.six import BytesIO
 from collections import OrderedDict
+from time import sleep
 
 from bs4 import BeautifulSoup
 
@@ -21,8 +26,9 @@ class Harps(object):
 
         with open(credentials_path, "r") as fp:
             credentials = yaml.load(fp)["eso"]
-
-        self.login(**credentials)
+            self._eso_credentials = (credentials["username"], credentials["password"])
+            
+        self.login(*self._eso_credentials)
 
         return None
 
@@ -30,8 +36,8 @@ class Harps(object):
 
     def login(self, username, password):
 
-        session = requests.Session()
-        prepare = session.get("https://www.eso.org/sso")
+        self.session = requests.Session()
+        prepare = self.session.get("https://www.eso.org/sso")
 
         root = BeautifulSoup(prepare.content, 'html5lib')
         login_input = root.find(name='input', attrs={'name': 'execution'})
@@ -39,24 +45,20 @@ class Harps(object):
         if login_input is None:
             raise ValueError("ESO page did not have the correct attribute")
 
-        execution = login_input.get('value')
-
-        login = session.post(prepare.url, 
-                             data=dict(
-                                username=username,
-                                password=password,
-                                execution=login_input.get("value"),
-                                _eventId="submit",
-                                geolocation=""
-                            ))
+        login = self.session.post(prepare.url, 
+                                  data=dict(
+                                     username=username,
+                                     password=password,
+                                     execution=login_input.get("value"),
+                                     _eventId="submit",
+                                     geolocation=""
+                                 ))
         login.raise_for_status()
 
         root = BeautifulSoup(login.content, "html5lib")
         authenticated = (root.find("h4").text == "Login successful")
 
         assert authenticated
-
-        self.session = session    
 
 
 
@@ -115,7 +117,6 @@ class Harps(object):
         ])
         payload.update(params)
 
-
         response = self.session.post(
             "http://archive.eso.org/wdb/wdb/adp/phase3_main/query", 
             files=payload)
@@ -150,12 +151,110 @@ class Harps(object):
             del table[column_name]
 
         # Parse the PHASE3 identifiers.
-        table["phsae3_dataset_identifier"] = re.findall(
+        table["dataset_identifier"] = re.findall(
             "PHASE3\+[0-9]+\+ADP\.[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}", 
             content)
 
         return table
 
 
+
+
+    def _prepare_dataset_request(self, dataset_identifier):
+
+        if isinstance(dataset_identifier, str):
+            dataset_identifier = [dataset_identifier]
+
+        data = [("dataset", dataset) for dataset in dataset_identifier]
+
+        prepare = self.session.post(
+            "http://dataportal.eso.org/rh/confirmation", data=data)
+
+        # Additional payload items required for confirmation.
+        data += [
+            ("requestDescription", ""),
+            ("deliveryMediaType", "WEB"), 
+            ("requestCommand", "SELECTIVE_HOTFLY"),
+            ("submit", "Submit")
+        ]
+
+        username = self._eso_credentials[0]
+        confirm = self.session.post(self._data_portal_api_end_point(
+                f"rh/requests/{username}/submission"),
+                data=data)
+        confirm.raise_for_status()
+
+        _ = re.findall("Request #[0-9]+\w", confirm.text)[0].split()[-1]
+        request_number = int(_.lstrip("#"))
+
+        return request_number
+
+
+
+    def _get_dataset_state(self, request_number):
+
+        username = self._eso_credentials[0]
+        status = self.session.get(self._data_portal_api_end_point(
+            f"rh/requests/{username}/recentRequests"))
+
+        idx = status.text.index(f"/rh/requests/{username}/{request_number}")
+        state = status.text[idx:].split("<img")[1].split("alt=")[1].split('"')[1]
+
+        return state
+
+
+    def _get_dataset_download_script(self, request_number):
+        username = self._eso_credentials[0]
+        url = self._data_portal_api_end_point(
+                f"rh/requests/{username}/{request_number}/script")
+        r = self.session.get(url)
+        return r.text
+        
+
+    def _get_dataset_remote_paths(self, request_number):
+        content = self._get_dataset_download_script(request_number)
+        paths = content.split("__EOF__")[-2].split("\n")[1:-2]
+        return tuple([path.strip('"') for path in paths])
+    
+
+    def _data_portal_api_end_point(self, end_point):
+        return f"https://dataportal.eso.org/{end_point}"
+
+
+
+
+    def get_spectrum(self, observation):
+
+        # This should be magical.
+        request = self._prepare_dataset_request(observation["dataset_identifier"])
+
+        while self._get_dataset_state(request) != "COMPLETE":
+            sleep(1)
+
+        remote_paths = self._get_dataset_remote_paths(request)
+
+        for remote_path in remote_paths:
+            if remote_path.endswith(".tar"):
+                local_path = self._get_dataset(remote_path)
+                
+                with tarfile.open(local_path) as tar:
+                    for member in tar.getmembers():
+                        if "s1d_A" in member.name:
+                            tar.extract(member)
+                            image = fits.open(member.name)
+        return image
+
+
+
+    def _get_dataset(self, remote_path):
+
+        r = self.session.get(remote_path, auth=HTTPBasicAuth(*self._eso_credentials))
+
+        local_path = os.path.basename(remote_path)
+
+        with open(local_path, "wb") as fp:
+            fp.write(r.content)
+
+        return local_path
 
 
