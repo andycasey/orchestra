@@ -16,6 +16,12 @@ from time import sleep
 
 from bs4 import BeautifulSoup
 
+from time import mktime
+from datetime import datetime
+
+def convert_obs_time(obs_time, fmt="%Y-%m-%dT%H:%M:%S.%f"):
+    return mktime(datetime(obs_time, fmt).timetuple())
+
 
 class Harps(object):
 
@@ -155,6 +161,9 @@ class Harps(object):
             "PHASE3\+[0-9]+\+ADP\.[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}", 
             content)
 
+        # Add obs_seconds?
+        table["date_obs_seconds"] = [convert_obs_time(ea) for ea in obs["Date Obs"]]
+
         return table
 
 
@@ -225,6 +234,10 @@ class Harps(object):
 
     def get_spectrum(self, observation):
 
+        # Instead of doing this we should request it from harps.guru API end
+        # point, and harps.guru should find it if it doesn't already have it.
+
+
         # This should be magical.
         request = self._prepare_dataset_request(observation["dataset_identifier"])
 
@@ -257,4 +270,11 @@ class Harps(object):
 
         return local_path
 
+
+
+
+# API end points.
+# api.harps.guru/identifier/{date_obs}
+# api.harps.guru/metadata/{identifier}
+# api.harps.guru/spectrum/{identifier}
 
