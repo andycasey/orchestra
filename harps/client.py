@@ -20,7 +20,7 @@ from time import mktime
 from datetime import datetime
 
 def convert_obs_time(obs_time, fmt="%Y-%m-%dT%H:%M:%S.%f"):
-    return mktime(datetime(obs_time, fmt).timetuple())
+    return mktime(datetime.strptime(obs_time, fmt).timetuple())
 
 
 class Harps(object):
