@@ -162,7 +162,7 @@ class Harps(object):
             content)
 
         # Add obs_seconds?
-        table["date_obs_seconds"] = [convert_obs_time(ea) for ea in obs["Date Obs"]]
+        table["date_obs_seconds"] = [convert_obs_time(ea) for ea in table["Date Obs"]]
 
         return table
 
