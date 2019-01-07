@@ -1,6 +1,5 @@
 
 import re
-import asyncio # so you know we are serious
 import os
 import requests
 import tarfile
@@ -10,7 +9,6 @@ from requests.auth import HTTPBasicAuth
 
 from astropy.io import fits
 from astropy.table import Table
-from astropy.extern.six import BytesIO
 from collections import OrderedDict
 from time import sleep
 
@@ -230,6 +228,16 @@ class Harps(object):
         return f"https://dataportal.eso.org/{end_point}"
 
 
+    def get_dataset_identifiers(self, dataset_identifiers, check_interval=1):
+
+        request_number = self._prepare_dataset_request(dataset_identifiers)
+
+        while self._get_dataset_state(request_number) != "COMPLETE":
+            sleep(check_interval)
+
+        return (request_number, self._get_dataset_remote_paths(request_number))
+
+
 
 
     def get_spectrum(self, observation):
@@ -271,6 +279,16 @@ class Harps(object):
         return local_path
 
 
+    def get_remote_path(self, remote_path, local_path):
+
+        r = self.session.get(remote_path, auth=HTTPBasicAuth(*self._eso_credentials))
+        if not r.ok:
+            r.raise_for_status()
+
+        with open(local_path, "wb") as fp:
+            fp.write(r.content)
+
+        return True
 
 
 # API end points.

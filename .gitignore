@@ -13,4 +13,7 @@ scripts/download_spectra.sh
 *.pkl
 *.pyc
 
-credentials.yaml
+*.yml
+*.pem
+
+.gitignore
