@@ -230,6 +230,9 @@ class Harps(object):
 
     def get_dataset_identifiers(self, dataset_identifiers, check_interval=1):
 
+        if len(dataset_identifiers) < 1:
+            return (None, [])
+        
         request_number = self._prepare_dataset_request(dataset_identifiers)
 
         while self._get_dataset_state(request_number) != "COMPLETE":

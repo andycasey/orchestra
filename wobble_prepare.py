@@ -8,17 +8,13 @@ import os
 import argparse
 import astropy.units as u
 import numpy as np
-import warnings
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
 from astroquery.gaia import Gaia
-#from astroquery.simbad import Simbad
 
 from harps.client import Harps
 
-warnings.simplefilter('ignore', UserWarning)
-
-parser = argparse.ArgumentParser(
-    description="""
+parser = argparse.ArgumentParser(description="""
 Search for, retrieve, and prepare HARPS data for use with Wobble.
 
 Given a provided source position, this script will perform a cone search against
@@ -38,7 +34,6 @@ def ValidFloatActionFactory(lower, upper):
             setattr(namespace, self.dest, values)
     return ValidateAction
 
-
 parser.add_argument("ra", metavar="ra",
                     type=float, action=ValidFloatActionFactory(0, 360),
                     help="right ascension of the source [degrees]")
@@ -57,14 +52,16 @@ parser.add_argument("--eso-credentials-path", metavar="eso_credentials_path",
                     help="local path containing ESO credentials")
 parser.add_argument("--working-directory", metavar="working_directory",
                     help="local working directory for files")
-
+parser.add_argument("--verbose", "-v", action="store_true",
+                    help="verbose logging")
 args = parser.parse_args()
 
 # Prepare logging.
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG) # todo: allow user-specified verbosity
+logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 
 ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 ch.setFormatter(logging.Formatter("%(message)s"))
 logger.addHandler(ch)
 
@@ -93,12 +90,6 @@ logger.info(f"Source identified as {gaia_result['designation'].decode()}")
 
 gaia_ra, gaia_dec = (gaia_result["ra"], gaia_result["dec"])
 
-# Step 2: Simbad resolve. (#todo)
-"""
-simbad_results = Simbad.query_object(gaia_result["designation"].decode())
-print(simbad_results)
-"""
-
 # Step 3: Search HARPS.
 logger.info("Logging in to ESO archive..")
 harps = Harps(args.eso_credentials_path)
@@ -114,6 +105,7 @@ if len(harps_results) < 1:
     raise NotImplementedError
 
 # Step 4: Download files.
+# todo: don't limit just to first 10 -- this is for testing only
 rid, paths = harps.get_dataset_identifiers(harps_results["dataset_identifier"][:10])
 N = len(paths)
 
@@ -125,30 +117,55 @@ if args.working_directory is None:
 os.makedirs(args.working_directory, exist_ok=True)
 logger.info(f"Downloading {N} files to {args.working_directory}")
 
+headers = dict()
+header_keys = (
+    "HIERARCH ESO DRS CAL TH FILE", 
+    "HIERARCH ESO DRS DRS CCF RVC", 
+    "HIERARCH ESO DRS BERV", 
+    "HIERARCH ESO DRS BJD",
+    "HIERARCH ESO DRS BERVMX"
+)
+
 for i, remote_path in enumerate(paths, start=1):
     local_path = os.path.join(args.working_directory, os.path.basename(remote_path))
     logger.info(f"  ({i}/{N}): {remote_path} -> {local_path}")
+    if os.path.exists(local_path):
+        logger.info("  -> Skipping")
+
+    else:
+        harps.get_remote_path(remote_path, local_path)
+
+    # If it's a FITS file, open it and get the wavelength calibration file.
+    if local_path.lower().endswith(".fits"):
+        with fits.open(local_path) as image:
+            headers[remote_path] = \
+                dict([(k, image[0].header.get(k, None)) for k in header_keys])
+
+# Download the unique calibration files.
+calibration_remote_paths = []
+for remote_path, h in headers.items():
+    for k, v in h.items():
+        if k == "HIERARCH ESO DRS CAL TH FILE":
+            calibration_remote_paths.append(f"SAF+{v[:-12]}.tar")
+calibration_remote_paths = list(set(calibration_remote_paths))
+
+cal_rid, cal_paths = harps.get_dataset_identifiers(calibration_remote_paths)
+
+logger.info(f"Downloading {len(cal_paths)} calibration files")
+
+for i, remote_path in enumerate(cal_paths, start=1):
+    local_path = os.path.join(args.working_directory, os.path.basename(remote_path))
+    logger.info(f"  ({i}/{len(cal_paths)}): {remote_path} -> {local_path}")
     if os.path.exists(local_path):
         logger.info("  -> Skipping")
         continue
 
     harps.get_remote_path(remote_path, local_path)
 
+# Step 5: Extract all downloaded TAR files.
 
-# Extract and get calibration files.
-
-# Get wavelength file from header: HIERARCH ESO DRS CAL TH FILE
-
-cal_path = ['SAF+HARPS.2013-09-29T19:40:13.18.tar']
-
-#Out[6]: 'HARPS.2013-09-29T19:40:13.181_wave_B.fits
-
-# Get RV from headers.
-
-
-# Step 5: Extract downloads.
 
 # Step 6: Run Bedell script.
 
 
-print("foo")
+print("Fin")
