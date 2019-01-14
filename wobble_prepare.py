@@ -8,8 +8,10 @@ import os
 import argparse
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import SkyCoord
+import tarfile
+from astropy.coordinates import (SkyCoord, EarthLocation)
 from astropy.io import fits
+from astropy.time import Time
 from astroquery.gaia import Gaia
 
 from harps.client import Harps
@@ -47,6 +49,9 @@ parser.add_argument("--radius", metavar="radius", type=float,
                     default=5 * u.arcsecond,
                     help="cone search radius [arcseconds] to use for external "\
                          "services (e.g., Gaia, Simbad)")
+parser.add_argument("--limit", metavar="limit", type=int,
+                    default=10000,
+                    help="limit the number of exposures to retrieve")
 parser.add_argument("--eso-credentials-path", metavar="eso_credentials_path",
                     default="eso_credentials.yml",
                     help="local path containing ESO credentials")
@@ -76,10 +81,10 @@ gaia_results = j.get_results()
 G = len(gaia_results)
 
 if G < 1:
-    raise NotImplementedError
+    raise NotImplementedError("no sources found in Gaia query")
 
 if G > 1:
-    raise NotImplementedError
+    raise NotImplementedError("multiple sources found in Gaia query")
 
 #python wobble_prepare.py 344.36658333333327 20.768833333333333
 gaia_result = gaia_results[0]
@@ -105,8 +110,8 @@ if len(harps_results) < 1:
     raise NotImplementedError
 
 # Step 4: Download files.
-# todo: don't limit just to first 10 -- this is for testing only
-rid, paths = harps.get_dataset_identifiers(harps_results["dataset_identifier"][:10])
+logger.info(f"Limiting to first {args.limit} rows")
+rid, paths = harps.get_dataset_identifiers(harps_results["dataset_identifier"][:args.limit])
 N = len(paths)
 
 if args.working_directory is None:
@@ -119,8 +124,9 @@ logger.info(f"Downloading {N} files to {args.working_directory}")
 
 headers = dict()
 header_keys = (
+    "ORIGFILE",
+    "ASSON1",
     "HIERARCH ESO DRS CAL TH FILE", 
-    "HIERARCH ESO DRS DRS CCF RVC", 
     "HIERARCH ESO DRS BERV", 
     "HIERARCH ESO DRS BJD",
     "HIERARCH ESO DRS BERVMX"
@@ -138,12 +144,12 @@ for i, remote_path in enumerate(paths, start=1):
     # If it's a FITS file, open it and get the wavelength calibration file.
     if local_path.lower().endswith(".fits"):
         with fits.open(local_path) as image:
-            headers[remote_path] = \
+            headers[local_path] = \
                 dict([(k, image[0].header.get(k, None)) for k in header_keys])
 
 # Download the unique calibration files.
 calibration_remote_paths = []
-for remote_path, h in headers.items():
+for local_path, h in headers.items():
     for k, v in h.items():
         if k == "HIERARCH ESO DRS CAL TH FILE":
             calibration_remote_paths.append(f"SAF+{v[:-12]}.tar")
@@ -163,9 +169,125 @@ for i, remote_path in enumerate(cal_paths, start=1):
     harps.get_remote_path(remote_path, local_path)
 
 # Step 5: Extract all downloaded TAR files.
+rv_headers = dict()
+
+all_paths = list(paths) + list(cal_paths)
+for i, path in enumerate(all_paths):
+    local_path = os.path.join(args.working_directory, os.path.basename(path))
+    if not local_path.endswith(".tar"): continue
+
+    # Un tar it.
+    with tarfile.open(local_path) as tar:
+
+        for member in tar.getmembers():
+            tar.extract(member)
+            member_local_path = os.path.join(args.working_directory,
+                                             os.path.basename(member.name))
+
+            os.system(f"mv {member.name} {member_local_path}")
 
 
-# Step 6: Run Bedell script.
+
+default_values = {"HIERARCH ESO DRS CAL TH FILE": ""}
+logger.info("Bookkeeping...")
+
+trim_eso_header = lambda _: _[13:] if _.startswith("HIERARCH ESO ") else _
+
+for header_key in header_keys:
+
+    default_value = default_values.get(header_key, np.nan)
+
+    values = []
+    for dataset_identifier in harps_results["dataset_identifier"]:
+
+        basename = "+".join(dataset_identifier.split("+")[2:])
+        local_path = os.path.join(args.working_directory, f"{basename}.fits")
+
+        value = headers.get(local_path, dict(header_key=default_value))\
+                       .get(header_key, default_value)
+
+        values.append(value)
 
 
-print("Fin")
+    harps_results[trim_eso_header(header_key)] = values
+
+# Values to extract from the calibration file.
+cal_header_keys = ("HIERARCH ESO DRS CCF RVC",
+                   "HIERARCH ESO DRS DVRMS")
+
+for h in cal_header_keys:
+    harps_results[trim_eso_header(h)] = np.nan * np.ones(len(harps_results))
+
+for i, (dataset_identifier, associated_file) \
+in enumerate(zip(harps_results["dataset_identifier"], harps_results["ASSON1"])):
+    
+    # Get the calibration file.
+    bis_g2_path = os.path.join(args.working_directory,
+                               associated_file.replace("DRS_HARPS_3.5.tar", "bis_G2_A.fits"))
+
+    if os.path.exists(bis_g2_path):
+        with fits.open(bis_g2_path) as image:
+            for h in cal_header_keys:
+                harps_results[trim_eso_header(h)][i] = image[0].header.get(h, np.nan)
+                print(h, image[0].header.get(h, np.nan))
+
+    else:
+        logger.warning(f"Could not find calibration file ({bis_g2_path}) for {dataset_identifier}")
+
+
+# Step 6: Add an astropy-calculated barycentric velocity correction to each
+#         header.
+
+logger.info("Calculating barycentric velocity corrections")
+
+observatory = EarthLocation.of_site("lasilla")
+gaia_coord = SkyCoord(ra=gaia_result["ra"] * u.degree,
+                      dec=gaia_result["dec"] * u.degree,
+                      pm_ra_cosdec=gaia_result["pmra"] * u.mas/u.yr,
+                      pm_dec=gaia_result["pmdec"] * u.mas/u.yr,
+                      obstime=Time(2015.5, format="decimalyear"),
+                      frame="icrs")
+
+def apply_space_motion(coord, time):
+    return SkyCoord(ra=coord.ra + coord.pm_ra_cosdec/np.cos(coord.dec.radian) * (time - coord.obstime),
+                    dec=coord.dec + coord.pm_dec * (time - coord.obstime),
+                    obstime=time, frame="icrs")
+
+
+berv_key = "ASTROPY BERV"
+harps_results[berv_key] = np.nan * np.ones(len(harps_results))
+
+diffs = []
+for i, dataset_identifier in enumerate(harps_results["dataset_identifier"]):
+
+    basename = "+".join(dataset_identifier.split("+")[2:])
+    local_path = os.path.join(args.working_directory, f"{basename}.fits")
+
+    if os.path.exists(local_path):
+
+        image = fits.open(local_path)
+
+        time = Time(image[0].header["HIERARCH ESO DRS BJD"], format="jd")
+        coord = apply_space_motion(gaia_coord, time)
+        berv = coord.radial_velocity_correction(location=observatory)\
+                    .to(u.km/u.s).value
+
+        harps_berv = image[0].header["HIERARCH ESO DRS BERV"]
+        harps_results[berv_key][i] = berv
+        image[0].header[berv_key] = berv
+
+        logger.info(f"{i}: {os.path.basename(local_path)} {time} ({coord.ra}, {coord.dec}) {harps_berv} {berv} {berv - harps_berv}")
+        image.writeto(local_path, overwrite=True)
+        diffs.append(berv - harps_berv)
+
+    else:
+        logger.warning(f"Skipping missing file {local_path}")
+
+logger.info(f"Of {len(diffs)} measurements, the mean and standard deviation of "\
+            f"(HARPS BERV - ASTROPY BERV) is {np.mean(diffs):.3f} km/s, {np.std(diffs):.3f} km/s")
+
+# Write HARPS summary results to disk.
+summary_path = os.path.join(args.working_directory, "summary.csv")
+harps_results.write(summary_path, overwrite=True)
+
+logger.info("Fin")
