@@ -36,6 +36,18 @@ def ValidFloatActionFactory(lower, upper):
             setattr(namespace, self.dest, values)
     return ValidateAction
 
+class ValidateRadius(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            values = values.to(u.arcsecond)
+
+        except:
+            logger.warning("Assuming radius is in arcseconds!")
+            values = values * u.arcsecond
+
+        setattr(namespace, self.dest, values)
+
+
 parser.add_argument("ra", metavar="ra",
                     type=float, action=ValidFloatActionFactory(0, 360),
                     help="right ascension of the source [degrees]")
@@ -49,6 +61,9 @@ parser.add_argument("--radius", metavar="radius", type=float,
                     default=5 * u.arcsecond,
                     help="cone search radius [arcseconds] to use for external "\
                          "services (e.g., Gaia, Simbad)")
+parser.add_argument("--gaia-adql-constraints", type=str, default="",
+                    metavar="gaia_adql_constraints",
+                    help="ADQL constraints to provide in ESA/Gaia query (e.g., ")
 parser.add_argument("--limit", metavar="limit", type=int,
                     default=10000,
                     help="limit the number of exposures to retrieve")
@@ -73,10 +88,22 @@ logger.addHandler(ch)
 # Step 1: Gaia search.
 input_coord = SkyCoord(ra=args.ra, dec=args.dec, unit=(u.degree, u.degree),
                        frame="icrs") # todo: allow user-specified frame
+gaia_adql_constraints = f" AND {args.gaia_adql_constraints}" if args.gaia_adql_constraints else ""
 
-logger.info(f"Querying Gaia at {input_coord}\nwith radius {args.radius}")
+logger.info(f"""Querying Gaia at {input_coord}
+with radius {args.radius}
+and constraints: {gaia_adql_constraints}""")
 
-j = Gaia.cone_search(input_coord, args.radius)
+#j = Gaia.cone_search(input_coord, args.radius)
+
+j = Gaia.launch_job(f"""SELECT DISTANCE(POINT('ICRS', ra, dec),
+                                        POINT('ICRS', {args.ra}, {args.dec})) AS dist, *
+                       FROM gaiadr2.gaia_source
+                       WHERE CONTAINS(POINT('ICRS', ra, dec),
+                                      CIRCLE('ICRS', {args.ra}, {args.dec}, {args.radius.to(u.deg).value})) = 1
+                       {gaia_adql_constraints}
+                       ORDER BY dist ASC""")
+
 gaia_results = j.get_results()
 G = len(gaia_results)
 
