@@ -1,0 +1,13 @@
+
+
+1. Search the reduced data products.
+2. Retrieve all of those, including the calibration files (see wobble_prepare.py).
+3. In the ADP...fits file, it contains the reduced spectrum. 
+    3.1. Load that and read in PROV1 keyword, which refers to the raw data frame. 
+    3.2. The  ESO DRS CAL FLAT FILE keyword refers to the FLAT field file.
+        "HARPS.2018-06-04T21:32:44.975_flat_A.fits" means that "HARPS.2018-06-04T21:32:44.975" is the dataset identifier for the original frame
+    3.3 The HIERARCH ESO DRS CAL TH FILE refers to the ThAr file I think.
+        So 'HARPS.2018-06-04T21:58:46.291_e2ds_A.fits' -> 'HARPS.2018-06-04T21:58:46.291' is the dataset identifier for the original ThArc
+
+    3.3 The "ARCFILE" keyword refers to a Phase 3 data product...
+        ADP.2018-06-06T01:04:09.045.fits

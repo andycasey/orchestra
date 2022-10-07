@@ -29,7 +29,7 @@ class Harps(object):
         self._credentials_path = credentials_path
 
         with open(credentials_path, "r") as fp:
-            credentials = yaml.load(fp)["eso"]
+            credentials = yaml.load(fp, Loader=yaml.FullLoader)["eso"]
             self._eso_credentials = (credentials["username"], credentials["password"])
             
         self.login(*self._eso_credentials)
@@ -64,6 +64,121 @@ class Harps(object):
 
         assert authenticated
 
+
+    def query_raw_data_products(self, ra, dec, box="00 10 00", calib_only=False, **kwargs):
+        payload = OrderedDict([
+            ("wdbo", (None, "html/display")),
+            ("max_rows_returned", (None, "{:.0f}".format(self.row_limit))),#self.row_limit))),
+            ("instrument", (None, "")),
+            ("tab_object", (None, "on")),
+            ("target", (None, "")),
+            ("resolver", (None, "simbad")),
+            ("ra", (None, f"{ra}")),
+            ("dec", (None, f"{dec}")),
+            ("box", (None, f"{box}")),
+            ("degrees_or_hours", (None, "hours")),
+            ("tab_target_coord", (None, "on")),
+            ("format", (None, "SexaHour")),
+            ("wdb_input_file", ("", "", "application/octet-stream")),
+            ("night", (None, "")),
+            ("stime", (None, "")),
+            ("starttime", (None, "12")),
+            ("etime", (None, "")),
+            ("endtime", (None, "12")),
+            ("tab_prog_id", (None, "on")),
+            ("prog_id", (None, "")),
+            ("gto", (None, "")),
+            ("pi_coi", (None, "")),
+            ("obs_mode", (None, "")),
+            ("title", (None, "")),
+            ("spectrum[]", (None, "HARPS")),
+            ("tab_dp_cat", (None, "on")),
+            ("dp_cat", (None, "CALIB" if calib_only else "")),
+            ("tab_dp_type", (None, "on")),
+            ("dp_type", (None, "")),
+            ("dp_type_user", (None, "")),
+            ("tab_dp_tech", (None, "on")),
+            ("dp_tech", (None, "")),
+            ("dp_tech_user", (None, "")),
+            ("tab_dp_id", (None, "on")),
+            ("dp_id", (None, "")),
+            ("origfile", (None, "")),
+            ("tab_rel_date", (None, "on")),
+            ("rel_date", (None, "")),
+            ("obs_name", (None, "")),
+            ("ob_id", (None, "")),
+            ("tab_tpl_start", (None, "on")),
+            ("tpl_start", (None, "")),
+            ("tab_tpl_id", (None, "on")),
+            ("tpl_id", (None, "")),
+            ("tab_exptime", (None, "on")),
+            ("exptime", (None, "")),
+            ("tab_filter_path", (None, "on")),
+            ("filter_path", (None, "")),
+            ("tab_wavelength_input", (None, "on")),
+            ("wavelength_input", (None, "")),
+            ("tab_fwhm_input", (None, "on")),
+            ("fwhm_input", (None, "")),
+            ("gris_path", (None, "")),
+            ("grat_path", (None, "")),
+            ("slit_path", (None, "")),
+            ("tab_instrument", (None, "on")),
+            ("add", (None, "((ins_id like 'HARPS%'))")),
+            ("tab_tel_airm_start", (None, "on")),
+            ("tab_stat_instrument", (None, "on")),
+            ("tab_ambient", (None, "on")),
+            ("tab_stat_exptime", (None, "on")),
+            ("tab_HDR", (None, "on")),
+            ("tab_mjd_obs", (None, "on")),
+            ("aladin_colour", (None, "aladin_instrument")),
+            ("tab_stat_plot", (None, "on")),
+            ("order", (None, "")),
+        ])
+        #payload.update(params)
+
+        response = self.session.post(
+            "http://archive.eso.org/wdb/wdb/eso/eso_archive_main/query", 
+            files=payload)
+
+        content = response.content.decode()
+
+        rows = "\n".join([r for r in content.split("\n") if "SAF+HARPS" in r])
+
+        _ = "<TR"
+        rows = _ + _.join(rows.replace("[doc&nbsp;id:", "[doc:").split(_)[1:])
+        if rows == _:
+            return Table(names=[n for n in names if n not in delete_names])
+
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.write(bytes(f"<table>{rows}</table>", encoding="utf-8"))
+        f.close()
+
+        names = [
+            "M",
+            "More",
+            "HDR",
+            "OBJECT",
+            "Target RA, Dec",
+            "Program ID",
+            "Instrument",
+            "Category",
+            "Type",
+            "Mode",
+            "dataset_identifier",
+            "Release Date",
+            "TPL ID",
+            "TPL START",
+            "Exptime",
+            "filter_lambda_min",
+            "filter_lambda_max",
+            "Filter",
+            "MJD-OBS",
+            "Airmass",
+            "DIMM Seeing at Start"
+        ]
+
+        table = Table.read(f.name, format="ascii.html", names=names)        
+        return table
 
 
     def query_position(self, ra, dec, **kwargs):
@@ -129,7 +244,7 @@ class Harps(object):
 
         rows = "\n".join([r for r in content.split("\n") if "PHASE3+" in r])
 
-        names = ("Mark", "More", "ARCFILE", "HDR", "Object", "RA", "DEC", "Filter",
+        names = ("Mark", "More", "ARCFILE", "HDR", "Object",  "RA", "DEC", "Filter",
                 "ABMAGLIM", "Wavelength", "SNR", "Resolution", "Product category",
                 "Instrument", "Date Obs", "Exptime", "Collection", "Product version",
                 "Release Description", "Run/Program ID", "ORIGFILE", "REFERENCE Catalog",
@@ -148,11 +263,16 @@ class Harps(object):
         f.close()
 
 
-        table = Table.read(f.name, format="ascii.html", names=names)
+        table = Table.read(f.name, format="ascii.html")
 
+        # Rename things.
         # Delete unnecessary columns.
-        for column_name in delete_names:
-            del table[column_name]
+        for idx in (1,2,3,5,6,10, 20,21,24,25):
+            del table[f"col{idx}"]
+            
+        names = ("ADP", "Object", "RA", "DEC", "Filter", "Wavelength", "SNR", "Resolution", "Product category", "Instrument", "Date Obs", "Exptime", "Collection",
+            "Run/Program ID", "ORIGFILE", "REFERENCE Catalog")
+        table = Table(table, names=names)
 
         # Parse the PHASE3 identifiers.
         table["dataset_identifier"] = re.findall(
